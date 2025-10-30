@@ -45,3 +45,17 @@
   background-color: var(--primary-color);
   color: white;
 }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid var(--medium-gray-color);
+}
+
+.logout-link {
+  color: var(--danger-color) !important;
+}
+
+.logout-link:hover {
+  background-color: #FEE2E2 !important;
+}

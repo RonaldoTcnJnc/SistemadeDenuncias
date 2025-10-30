@@ -1,0 +1,12 @@
+.reports-analytics-page{ padding:20px }
+.reports-analytics-page h1{ font-size:28px; margin-bottom:18px }
+.top-row{ display:flex; gap:18px; margin-bottom:18px }
+.card{ background: var(--white-color); padding:20px; border-radius:12px; box-shadow:var(--box-shadow) }
+.chart-card{ flex:1 }
+.chart-placeholder{ height:220px; border-radius:8px; background: linear-gradient(180deg,#ffffff,#f7fafc); display:flex; align-items:center; justify-content:center; color:var(--dark-gray-color) }
+.metrics-row{ display:flex; gap:12px; margin-bottom:18px }
+.metric{ flex:1; background: var(--white-color); padding:16px; border-radius:10px; text-align:left }
+.metric-title{ color: var(--dark-gray-color); font-size:13px }
+.metric-value{ font-size:20px; font-weight:700; margin-top:8px }
+.geo-card{ margin-top:8px }
+.map-large{ height:260px; border-radius:8px; background: linear-gradient(180deg,#eef2f7,#f7fafc); display:flex; align-items:center; justify-content:center; color:var(--dark-gray-color) }

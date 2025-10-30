@@ -3,6 +3,7 @@ import HomePage from './components/HomePage/HomePage';
 import LoginPage from './components/LoginPage/LoginPage';
 import CitizenDashboard from './components/CitizenDashboard/CitizenDashboard';
 import ProfilePage from './components/ProfilePage/ProfilePage';
+import ReportsAnalytics from './components/Reports/ReportsAnalytics';
 
 // Layout para las páginas que tienen la barra lateral
 import DashboardLayout from './components/DashboardLayout/DashboardLayout';
@@ -48,9 +49,45 @@ function App() {
           }
         />
 
-        {/* Rutas que estaban enlazadas desde la UI pero no implementadas */}
-        <Route path="/nueva-denuncia" element={<NewReport />} />
-        <Route path="/mis-denuncias" element={<MyReports />} />
+        <Route
+          path="/informes"
+          element={
+            isAuthenticated ? (
+              <DashboardLayout>
+                <ReportsAnalytics />
+              </DashboardLayout>
+            ) : (
+              <Navigate to="/iniciar-sesion" />
+            )
+          }
+        />
+
+        <Route
+          path="/nueva-denuncia"
+          element={
+            isAuthenticated ? (
+              <DashboardLayout>
+                <NewReport />
+              </DashboardLayout>
+            ) : (
+              <Navigate to="/iniciar-sesion" />
+            )
+          }
+        />
+
+        <Route
+          path="/mis-denuncias"
+          element={
+            isAuthenticated ? (
+              <DashboardLayout>
+                <MyReports />
+              </DashboardLayout>
+            ) : (
+              <Navigate to="/iniciar-sesion" />
+            )
+          }
+        />
+
         <Route path="/registro" element={<Register />} />
 
         {/* Redirección por defecto si no encuentra la ruta */}
