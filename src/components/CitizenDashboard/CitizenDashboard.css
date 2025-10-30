@@ -1,0 +1,79 @@
+.citizen-dashboard-container h1 {
+  font-size: 28px;
+  margin-bottom: 30px;
+}
+
+/* Notifications */
+.notification-item {
+  display: flex;
+  gap: 15px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--medium-gray-color);
+}
+.notification-item:last-child {
+  border-bottom: none;
+}
+.notification-icon {
+  font-size: 24px;
+}
+.notification-item.resolved .notification-icon { color: var(--success-color); border-left: 3px solid var(--success-color); padding-left: 15px; }
+.notification-item.in_process .notification-icon { color: var(--warning-color); border-left: 3px solid var(--warning-color); padding-left: 15px; }
+.notification-content p { margin: 0 0 5px 0; }
+.notification-content .comment { color: var(--dark-gray-color); display: block; margin-bottom: 5px; }
+.notification-content .time { font-size: 12px; color: #999; }
+
+/* Reports */
+.report-card { margin-bottom: 20px; }
+.report-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+.report-header h4 { margin: 0; font-size: 18px; }
+.report-meta { margin: 5px 0 0 0; font-size: 14px; color: var(--dark-gray-color); }
+.status-tag {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+}
+.status-tag.pendiente { background-color: var(--danger-color); }
+.status-tag.en-proceso { background-color: var(--warning-color); }
+.status-tag.resuelto { background-color: var(--success-color); }
+
+.report-description {
+  color: var(--text-color);
+}
+
+.report-update, .report-resolution {
+  background-color: var(--light-gray-color);
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+  font-size: 14px;
+  border-left: 4px solid var(--warning-color);
+}
+.report-resolution {
+  border-left-color: var(--success-color);
+}
+
+/* Botón flotante */
+.btn-create-new {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 15px 25px;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s;
+}
+.btn-create-new:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+}

@@ -1,0 +1,43 @@
+.dashboard-layout-container {
+  display: flex;
+}
+
+.dashboard-main-content {
+  flex-grow: 1;
+  background-color: var(--background-color);
+}
+
+.dashboard-header {
+  height: 70px;
+  background: var(--white-color);
+  border-bottom: 1px solid var(--medium-gray-color);
+  padding: 0 40px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.notification-icon {
+  color: var(--dark-gray-color);
+  cursor: pointer;
+}
+
+.dashboard-page-content {
+  padding: 40px;
+}
+
+/* Estilos para las tarjetas que se usarán en varias páginas */
+.card {
+  background: var(--white-color);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: var(--box-shadow);
+  margin-bottom: 30px;
+}
+
+.card h3 {
+  margin-top: 0;
+  border-bottom: 1px solid var(--medium-gray-color);
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
