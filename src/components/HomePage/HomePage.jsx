@@ -15,7 +15,7 @@ const Header = () => (
         <Link to="#">Ayuda</Link>
       </nav>
       <div className="header-buttons">
-        <Link to="/panel" className="btn btn-primary">Reportar Incidencia</Link>
+        <Link to="/iniciar-sesion-autoridad" className="btn btn-primary">Iniciar sesión (Autoridad)</Link>
         <Link to="/iniciar-sesion" className="btn btn-secondary">Iniciar sesión</Link>
       </div>
     </div>
