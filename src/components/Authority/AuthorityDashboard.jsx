@@ -1,9 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './AuthorityDashboard.css';
 import AuthorityLayout from './AuthorityLayout';
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { FiLock, FiShield, FiClock, FiChevronRight } from 'react-icons/fi';
 
+// Reemplaza con tu Google Maps API Key
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY_HERE';
+
+// Coordenadas default para Lima, Perú
+const LIMA_COORDINATES = {
+  lat: -12.0463,
+  lng: -77.0428
+};
+
+const mapContainerStyle = {
+  width: '100%',
+  height: '400px',
+  borderRadius: '10px'
+};
+
 const AuthorityDashboard = () => {
+  const [mapMarkers, setMapMarkers] = useState([
+    { id: 1, lat: -12.0463, lng: -77.0428, title: 'Lima Centro' }
+  ]);
+
+  const handleMapClick = (event) => {
+    // Opcional: permitir agregar marcadores al hacer click en el mapa
+    const newMarker = {
+      id: mapMarkers.length + 1,
+      lat: event.latLng.lat(),
+      lng: event.latLng.lng(),
+      title: `Incidente #${mapMarkers.length + 1}`
+    };
+    setMapMarkers([...mapMarkers, newMarker]);
+  };
+
   return (
     <AuthorityLayout>
       <div className="authority-dashboard-container">
@@ -75,6 +106,30 @@ const AuthorityDashboard = () => {
 
           <div style={{marginTop:16, textAlign:'right'}}>
             <button className="start-button">Iniciar nueva denuncia</button>
+          </div>
+        </div>
+
+        <div className="card map-card" style={{marginTop:20}}>
+          <h3>Mapa de incidencias de tránsito</h3>
+          <p className="muted" style={{marginBottom:'16px'}}>Visualiza los incidentes reportados en Lima y alrededores. Puedes hacer click en el mapa para agregar un nuevo reporte.</p>
+          <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY}>
+            <GoogleMap 
+              mapContainerStyle={mapContainerStyle} 
+              center={LIMA_COORDINATES} 
+              zoom={12}
+              onClick={handleMapClick}
+            >
+              {mapMarkers.map((marker) => (
+                <Marker
+                  key={marker.id}
+                  position={{ lat: marker.lat, lng: marker.lng }}
+                  title={marker.title}
+                />
+              ))}
+            </GoogleMap>
+          </LoadScript>
+          <div style={{marginTop:'12px', fontSize:'12px', color:'#666'}}>
+            <strong>Nota:</strong> Configura tu Google Maps API Key en las variables de entorno para que el mapa funcione completamente.
           </div>
         </div>
       </div>
