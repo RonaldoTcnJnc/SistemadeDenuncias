@@ -1,9 +1,42 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import './ProfilePage.css';
 // Placeholder para imagen de perfil (usar svg existente)
 import profilePlaceholder from '../../assets/react.svg'; 
 
 const ProfilePage = () => {
+    const [profileImage, setProfileImage] = useState(profilePlaceholder);
+    const fileInputRef = useRef(null);
+
+    const handleEditPicClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (event) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            // Validar que sea una imagen PNG o JPG
+            const validTypes = ['image/png', 'image/jpeg'];
+            const maxSize = 5 * 1024 * 1024; // 5MB en bytes
+
+            if (!validTypes.includes(file.type)) {
+                alert('Por favor, selecciona un archivo PNG o JPG.');
+                return;
+            }
+
+            if (file.size > maxSize) {
+                alert('El archivo es demasiado grande. El tamaño máximo es 5MB.');
+                return;
+            }
+
+            // Crear una URL temporal para mostrar la imagen
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setProfileImage(e.target?.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     return (
         <div className="profile-page-container">
             <h1>Mi Perfil</h1>
@@ -12,8 +45,15 @@ const ProfilePage = () => {
                 <h3>Información Personal</h3>
                 <div className="personal-info-form">
                     <div className="profile-picture-section">
-                        <img src={profilePlaceholder} alt="Foto de perfil" />
-                        <button className="btn-edit-pic">✏️</button>
+                        <img src={profileImage} alt="Foto de perfil" />
+                        <button className="btn-edit-pic" onClick={handleEditPicClick}>✏️</button>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/png,image/jpeg"
+                            onChange={handleFileChange}
+                            style={{ display: 'none' }}
+                        />
                         <p>Haz clic en el lápiz para cambiar tu foto de perfil. <br/> PNG o JPG. Máximo 5MB.</p>
                     </div>
                     <div className="info-fields">
