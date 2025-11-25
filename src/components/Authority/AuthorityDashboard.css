@@ -39,6 +39,24 @@
 .icon-gray { background: #6b7280; }
 .security-card .security-item svg { color: rgba(0,0,0,0.45); }
 
+/* Steps card styles replacing the dashboard */
+.steps-card { padding: 28px; border-radius: 14px; }
+.steps-list { list-style: none; counter-reset: step; padding: 0; margin: 0; }
+.steps-list .step { display:flex; gap:18px; align-items:flex-start; padding:14px 0; border-bottom:1px solid rgba(0,0,0,0.04); }
+.steps-list .step:last-child { border-bottom: none; }
+.step-number { width:44px; height:44px; border-radius:50%; background:var(--primary-color); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; flex:0 0 44px; }
+.step-content { flex:1; }
+.checklist.card { margin-top:18px; padding:18px; background: #fbfcfd; border-radius:10px; }
+.required-list { margin:8px 0 0 0; padding-left:18px; }
+.required-list li { margin-bottom:6px; }
+.note { margin-top:12px; padding:12px; background: #f7faf8; border-radius:10px; }
+.start-button { background:var(--primary-color); color:white; border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:600; }
+
+@media (max-width: 700px) {
+  .step-number { width:36px; height:36px; font-size:14px; }
+  .authority-dashboard-container { padding:20px; }
+}
+
 @media (max-width: 900px) {
   .authority-grid { flex-direction:column; }
   .side-column { width:100%; }

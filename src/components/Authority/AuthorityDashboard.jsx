@@ -7,90 +7,76 @@ const AuthorityDashboard = () => {
   return (
     <AuthorityLayout>
       <div className="authority-dashboard-container">
-        <h1>Dashboard de Autoridades</h1>
-        <p className="subtitle">Un resumen de las denuncias y estadísticas de la ciudad.</p>
+        <h1>Guía rápida: Denuncia de tránsito (Perú)</h1>
+        <p className="subtitle">Pasos recomendados y documentación necesaria para presentar una denuncia de tránsito conforme a normas y buenas prácticas en Perú.</p>
 
-        <div className="stats-row">
-          <div className="stat-card">
-            <div className="stat-label">Total de Denuncias</div>
-            <div className="stat-value">1,250</div>
+        <div className="card steps-card">
+          <h3>Pasos a seguir</h3>
+          <ol className="steps-list">
+            <li className="step">
+              <div className="step-number">1</div>
+              <div className="step-content">
+                <strong>Prioriza la seguridad y asistencia.</strong>
+                <div className="muted">Si hay lesionados o riesgo inminente, solicita ayuda a la Policía Nacional del Perú o servicios de emergencia y resguarda la escena.</div>
+              </div>
+            </li>
+            <li className="step">
+              <div className="step-number">2</div>
+              <div className="step-content">
+                <strong>Recolecta pruebas en el lugar.</strong>
+                <div className="muted">Toma fotografías y videos (placas, daños, señalización, ubicación). Anota fecha, hora, punto exacto y condiciones (clima, iluminación).</div>
+              </div>
+            </li>
+            <li className="step">
+              <div className="step-number">3</div>
+              <div className="step-content">
+                <strong>Identifica a las partes y testigos.</strong>
+                <div className="muted">Anota nombres, números de documento, teléfonos, y testimonios de testigos si los hay.</div>
+              </div>
+            </li>
+            <li className="step">
+              <div className="step-number">4</div>
+              <div className="step-content">
+                <strong>Guarda documentación y comprobantes.</strong>
+                <div className="muted">Reúne licencia de conducir, SOAT, tarjeta de propiedad, y cualquier boleta o certificado médico si corresponde.</div>
+              </div>
+            </li>
+            <li className="step">
+              <div className="step-number">5</div>
+              <div className="step-content">
+                <strong>Presenta la denuncia ante la autoridad competente.</strong>
+                <div className="muted">Dependiendo del caso puede ser la comisaría, la municipalidad (dirección de tránsito) o la Fiscalía en casos con lesiones graves. Verifica la vía de presentación (presencial o en línea) en tu municipalidad.</div>
+              </div>
+            </li>
+            <li className="step">
+              <div className="step-number">6</div>
+              <div className="step-content">
+                <strong>Solicita copia de tu denuncia y seguimiento.</strong>
+                <div className="muted">Pide el número de expediente o constancia y los plazos estimados para la respuesta o resolución.</div>
+              </div>
+            </li>
+          </ol>
+
+          <div className="checklist card">
+            <h4>Documentos y pruebas recomendadas</h4>
+            <ul className="required-list">
+              <li>Fotos y videos del incidente</li>
+              <li>Documento de identidad (DNI/RUC)</li>
+              <li>Licencia de conducir y SOAT (si aplica)</li>
+              <li>Placas y modelo del vehículo involucrado</li>
+              <li>Contactos de testigos</li>
+              <li>Boletas, partes o certificados médicos (si hay lesiones)</li>
+            </ul>
           </div>
-          <div className="stat-card">
-            <div className="stat-label">Denuncias Resueltas</div>
-            <div className="stat-value">980</div>
+
+          <div className="note muted">
+            Esta guía resume pasos habituales y buenas prácticas. Para procedimientos y requisitos formales revisa la web de tu municipalidad o consulta con la Policía Nacional / Fiscalía según el caso.
           </div>
-          <div className="stat-card">
-            <div className="stat-label">Denuncias Pendientes</div>
-            <div className="stat-value">270</div>
+
+          <div style={{marginTop:16, textAlign:'right'}}>
+            <button className="start-button">Iniciar nueva denuncia</button>
           </div>
         </div>
-
-        <div className="card">
-          <h3>Listado de Denuncias</h3>
-          <div className="filters-row" style={{marginBottom: '12px'}}>
-            <div style={{flex:1}}></div>
-            <div style={{display:'flex', gap:10}}>
-              <select>
-                <option>Filtrar por estado</option>
-              </select>
-              <select>
-                <option>Filtrar por distrito</option>
-              </select>
-            </div>
-          </div>
-
-          <table className="denuncias-table">
-            <thead>
-              <tr><th>ID</th><th>PROBLEMA</th><th>UBICACIÓN</th><th>ESTADO</th><th>FECHA</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="mono">#12345</td>
-                <td>Bache</td>
-                <td>Calle Principal</td>
-                <td><span className="badge badge--resuelta">Resuelta</span></td>
-                <td>2024-01-15</td>
-              </tr>
-              <tr>
-                <td className="mono">#12346</td>
-                <td>Farola Rota</td>
-                <td>Avenida del Roble</td>
-                <td><span className="badge badge--pendiente">Pendiente</span></td>
-                <td>2024-01-16</td>
-              </tr>
-              <tr>
-                <td className="mono">#12347</td>
-                <td>Grafiti</td>
-                <td>Calle del Olmo</td>
-                <td><span className="badge badge--enprogreso">En Progreso</span></td>
-                <td>2024-01-17</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div className="card map-card" style={{marginTop:20}}>
-          <h3>Mapa de Denuncias</h3>
-          <div className="map-placeholder">Mapa de incidencias (placeholder)</div>
-        </div>
-
-        <aside style={{display:'none'}} className="side-column">
-          <div className="card security-card">
-            <h3>Seguridad</h3>
-            <div className="security-item">
-              <div className="label"><span className="icon icon-blue"><FiLock /></span> <span>Cambiar contraseña</span></div>
-              <FiChevronRight />
-            </div>
-            <div className="security-item">
-              <div className="label"><span className="icon icon-green"><FiShield /></span> <span>Autenticación de dos factores</span></div>
-              <FiChevronRight />
-            </div>
-            <div className="security-item">
-              <div className="label"><span className="icon icon-gray"><FiClock /></span> <span>Actividad de la cuenta</span></div>
-              <FiChevronRight />
-            </div>
-          </div>
-        </aside>
       </div>
     </AuthorityLayout>
   );
