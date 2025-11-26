@@ -1,52 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './AuthorityDashboard.css';
 import AuthorityLayout from './AuthorityLayout';
-import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { FiLock, FiShield, FiClock, FiChevronRight } from 'react-icons/fi';
 
-// Reemplaza con tu Google Maps API Key
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-
-// Coordenadas default para Cusco, Perú
-const CUSCO_COORDINATES = {
-  lat: -13.5316,
-  lng: -71.9877
-};
-
-const mapContainerStyle = {
-  width: '100%',
-  height: '400px',
-  borderRadius: '10px'
-};
-
 const AuthorityDashboard = () => {
-  // Sample incident data (replace with real API data)
-  const sampleIncidents = [
-    { id: 1, lat: -13.5320, lng: -71.9675, title: 'Accidente leve', type: 'accidente' },
-    { id: 2, lat: -13.5235, lng: -71.9780, title: 'Bache grande', type: 'vialidad' },
-    { id: 3, lat: -13.5352, lng: -71.9890, title: 'Semáforo dañado', type: 'alumbrado' },
-    { id: 4, lat: -13.5280, lng: -71.9950, title: 'Choque múltiple', type: 'accidente' },
-    { id: 5, lat: -13.5370, lng: -71.9810, title: 'Vehículo abandonado', type: 'otros' }
-  ];
-
-  const [mapMarkers, setMapMarkers] = useState(sampleIncidents);
-
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    id: 'authority-map'
-  });
-
-  const handleMapClick = (event) => {
-    // Permitir agregar marcadores al hacer click (opcional)
-    const newMarker = {
-      id: mapMarkers.length + 1,
-      lat: event.latLng.lat(),
-      lng: event.latLng.lng(),
-      title: `Incidente #${mapMarkers.length + 1}`,
-      type: 'otros'
-    };
-    setMapMarkers([...mapMarkers, newMarker]);
-  };
 
   return (
     <AuthorityLayout>
@@ -119,62 +76,6 @@ const AuthorityDashboard = () => {
 
           <div style={{marginTop:16, textAlign:'right'}}>
             <button className="start-button">Iniciar nueva denuncia</button>
-          </div>
-        </div>
-
-        <div className="card map-card" style={{marginTop:20}}>
-          <h3>Mapa de incidencias de tránsito (Cusco)</h3>
-          <p className="muted" style={{marginBottom:'16px'}}>Visualiza los incidentes reportados en Cusco. Los pines muestran el tipo de incidencia.</p>
-          {(!GOOGLE_MAPS_API_KEY || loadError) ? (
-            <div className="map-error">
-              <p><strong>Google Maps no está disponible.</strong> Comprueba la consola y la clave `VITE_GOOGLE_MAPS_API_KEY` en `.env`.</p>
-              <div style={{width:'100%', height:400, borderRadius:6, overflow:'hidden', border:'1px solid #ddd'}}>
-                <iframe
-                  title="OSM Cusco fallback"
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  scrolling="no"
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${CUSCO_COORDINATES.lng-0.05}%2C${CUSCO_COORDINATES.lat-0.03}%2C${CUSCO_COORDINATES.lng+0.05}%2C${CUSCO_COORDINATES.lat+0.03}&layer=mapnik&marker=${CUSCO_COORDINATES.lat}%2C${CUSCO_COORDINATES.lng}`}
-                />
-              </div>
-            </div>
-          ) : (
-            isLoaded ? (
-              <GoogleMap
-                mapContainerStyle={mapContainerStyle}
-                center={CUSCO_COORDINATES}
-                zoom={13}
-                onClick={handleMapClick}
-              >
-                {mapMarkers.map((marker) => {
-                  // choose color by type
-                  const colorMap = {
-                    accidente: 'red',
-                    vialidad: 'orange',
-                    alumbrado: 'yellow',
-                    otros: 'blue'
-                  };
-                  const color = colorMap[marker.type] || 'purple';
-                  const iconUrl = `https://maps.google.com/mapfiles/ms/icons/${color}-dot.png`;
-                  return (
-                    <Marker
-                      key={marker.id}
-                      position={{ lat: marker.lat, lng: marker.lng }}
-                      title={marker.title}
-                      icon={{ url: iconUrl }}
-                    />
-                  );
-                })}
-              </GoogleMap>
-            ) : (
-              <div style={{width:'100%', height:400, display:'flex', alignItems:'center', justifyContent:'center'}}>
-                Cargando mapa...
-              </div>
-            )
-          )}
-          <div style={{marginTop:'12px', fontSize:'12px', color:'#666'}}>
-            <strong>Nota:</strong> Si deseas que estos pines vengan de la base de datos, puedo conectarlos a la API y mostrarlos dinámicamente.
           </div>
         </div>
       </div>
