@@ -1,28 +1,12 @@
 import React, { useState } from 'react';
 import './NewReport.css';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { GoogleMap, LoadScript, Marker, Autocomplete } from '@react-google-maps/api';
 
-// Configurar iconos de Leaflet
-const defaultIcon = L.icon({
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
-const customIcon = L.icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-  iconSize: [34, 34],
-  iconAnchor: [17, 34],
-  popupAnchor: [0, -30]
-});
-L.Marker.prototype.options.icon = defaultIcon;
+// Google Maps API Key (usa .env variable VITE_GOOGLE_MAPS_API_KEY)
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY_HERE';
 
 // Coordenadas de Cusco, Perú
-const CUSCO_COORDINATES = [-13.5316, -71.9877];
+const CUSCO_COORDINATES = { lat: -13.5316, lng: -71.9877 };
 
 const categories = ['Vialidad', 'Alumbrado Público', 'Basura', 'Grafiti', 'Señales', 'Otros'];
 
@@ -41,6 +25,7 @@ const NewReport = () => {
   const [selectedPos, setSelectedPos] = useState(CUSCO_COORDINATES);
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
+  const [autocomplete, setAutocomplete] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -81,7 +66,7 @@ const NewReport = () => {
     if (!navigator.geolocation) return alert('Geolocalización no soportada por tu navegador');
     navigator.geolocation.getCurrentPosition((pos) => {
       const { latitude, longitude } = pos.coords;
-      setSelectedPos([latitude, longitude]);
+      setSelectedPos({ lat: latitude, lng: longitude });
       setForm(prev => ({ ...prev, location: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` }));
     }, (err) => {
       console.error(err);
@@ -89,29 +74,19 @@ const NewReport = () => {
     });
   };
 
-  const handleSearch = async () => {
-    if (!searchQuery || searching) return;
-    setSearching(true);
-    try {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1&addressdetails=1`;
-      const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
-      const data = await res.json();
-      if (data && data.length) {
-        const item = data[0];
-        const lat = parseFloat(item.lat);
-        const lon = parseFloat(item.lon);
-        setSelectedPos([lat, lon]);
-        const display = item.display_name || `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
-        setForm(prev => ({ ...prev, location: display }));
-      } else {
-        alert('No se encontraron resultados para esa búsqueda.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Error en la búsqueda. Intenta de nuevo.');
-    } finally {
-      setSearching(false);
+  // handle search via Autocomplete place
+  const onLoadAutocomplete = (auto) => setAutocomplete(auto);
+  const onPlaceChanged = () => {
+    if (!autocomplete) return;
+    const place = autocomplete.getPlace();
+    if (!place.geometry || !place.geometry.location) {
+      alert('No se encontró la ubicación seleccionada en Places');
+      return;
     }
+    const lat = place.geometry.location.lat();
+    const lng = place.geometry.location.lng();
+    setSelectedPos({ lat, lng });
+    setForm(prev => ({ ...prev, location: place.formatted_address || `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
   };
 
   if (submitted) {
@@ -206,50 +181,43 @@ const NewReport = () => {
             <label>Selecciona la ubicación en el mapa</label>
             <div className="map-controls">
               <div className="search-box">
-                <input
-                  type="text"
-                  placeholder="Buscar dirección o lugar (ej: Plaza de Armas Cusco)"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <button type="button" className="btn-small" onClick={handleSearch} disabled={searching}>{searching ? 'Buscando...' : 'Buscar'}</button>
+                <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} libraries={["places"]}>
+                  <Autocomplete onLoad={onLoadAutocomplete} onPlaceChanged={onPlaceChanged}>
+                    <input
+                      type="text"
+                      placeholder="Buscar dirección o lugar (ej: Plaza de Armas Cusco)"
+                      className="gm-search-input"
+                    />
+                  </Autocomplete>
+                </LoadScript>
+                <button type="button" className="btn-small" onClick={handleLocateMe}>Ubicarme</button>
               </div>
-              <button type="button" className="btn-small" onClick={handleLocateMe}>Ubicarme</button>
             </div>
 
-            <MapContainer
-              center={selectedPos}
-              zoom={13}
-              className="map-container"
-              whenCreated={(map) => { /* future ref if needed */ }}
-              onClick={(e) => {
-                const { lat, lng } = e.latlng;
-                setSelectedPos([lat, lng]);
-                setForm(prev => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
-              }}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; OpenStreetMap contributors'
-              />
-              <Marker
-                position={selectedPos}
-                icon={customIcon}
-                draggable={true}
-                eventHandlers={{
-                  dragend: (event) => {
-                    const marker = event.target;
-                    const { lat, lng } = marker.getLatLng();
-                    setSelectedPos([lat, lng]);
-                    setForm(prev => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
-                  }
+            <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} libraries={["places"]}>
+              <GoogleMap
+                mapContainerStyle={{ width: '100%', height: '400px', borderRadius: 6 }}
+                center={selectedPos}
+                zoom={13}
+                onClick={(e) => {
+                  const lat = e.latLng.lat();
+                  const lng = e.latLng.lng();
+                  setSelectedPos({ lat, lng });
+                  setForm(prev => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
                 }}
               >
-                <Popup>
-                  {`Seleccionado: ${selectedPos[0].toFixed(6)}, ${selectedPos[1].toFixed(6)}`}
-                </Popup>
-              </Marker>
-            </MapContainer>
+                <Marker
+                  position={selectedPos}
+                  draggable={true}
+                  onDragEnd={(e) => {
+                    const lat = e.latLng.lat();
+                    const lng = e.latLng.lng();
+                    setSelectedPos({ lat, lng });
+                    setForm(prev => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
+                  }}
+                />
+              </GoogleMap>
+            </LoadScript>
             <div style={{marginTop:8, color:'#555', fontSize:13}}>
               Coordenadas seleccionadas: {selectedPos[0].toFixed(6)}, {selectedPos[1].toFixed(6)}
             </div>
