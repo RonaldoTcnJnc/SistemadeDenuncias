@@ -32,6 +32,8 @@ const NewReport = () => {
 
   const [submitted, setSubmitted] = useState(false);
 
+  const [selectedPos, setSelectedPos] = useState(CUSCO_COORDINATES);
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === 'photo' && files[0]) {
@@ -157,17 +159,42 @@ const NewReport = () => {
 
           <div className="form-group">
             <label>Selecciona la ubicación en el mapa</label>
-            <MapContainer center={CUSCO_COORDINATES} zoom={13} className="map-container">
+            <MapContainer
+              center={selectedPos}
+              zoom={13}
+              className="map-container"
+              onclick={(e) => { /* fallback: MapContainer supports lowercase onclick */ }}
+              whenCreated={(map) => { /* keep reference if needed later */ }}
+              onClick={(e) => {
+                const { lat, lng } = e.latlng;
+                setSelectedPos([lat, lng]);
+                setForm(prev => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
+              }}
+            >
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; OpenStreetMap contributors'
               />
-              <Marker position={CUSCO_COORDINATES}>
+              <Marker
+                position={selectedPos}
+                draggable={true}
+                eventHandlers={{
+                  dragend: (event) => {
+                    const marker = event.target;
+                    const { lat, lng } = marker.getLatLng();
+                    setSelectedPos([lat, lng]);
+                    setForm(prev => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
+                  }
+                }}
+              >
                 <Popup>
-                  Cusco, Perú - Centro de la ciudad
+                  {`Seleccionado: ${selectedPos[0].toFixed(6)}, ${selectedPos[1].toFixed(6)}`}
                 </Popup>
               </Marker>
             </MapContainer>
+            <div style={{marginTop:8, color:'#555', fontSize:13}}>
+              Coordenadas seleccionadas: {selectedPos[0].toFixed(6)}, {selectedPos[1].toFixed(6)}
+            </div>
           </div>
 
           <button type="submit" className="btn-submit">Enviar denuncia</button>
