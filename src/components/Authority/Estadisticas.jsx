@@ -87,10 +87,7 @@ const Estadisticas = () => {
           </div>
         </div>
 
-        <div className="map-card">
-          <h3>Distribución Geográfica de Incidencias</h3>
-          <div className="map-placeholder">Mapa interactivo (placeholder)</div>
-        </div>
+        {/* Mapa eliminado según solicitud del usuario */}
       </div>
     </AuthorityLayout>
   );
