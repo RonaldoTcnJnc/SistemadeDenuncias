@@ -5,12 +5,12 @@ import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import { FiLock, FiShield, FiClock, FiChevronRight } from 'react-icons/fi';
 
 // Reemplaza con tu Google Maps API Key
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY_HERE';
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
-// Coordenadas default para Lima, Perú
-const LIMA_COORDINATES = {
-  lat: -12.0463,
-  lng: -77.0428
+// Coordenadas default para Cusco, Perú
+const CUSCO_COORDINATES = {
+  lat: -13.5316,
+  lng: -71.9877
 };
 
 const mapContainerStyle = {
@@ -20,17 +20,25 @@ const mapContainerStyle = {
 };
 
 const AuthorityDashboard = () => {
-  const [mapMarkers, setMapMarkers] = useState([
-    { id: 1, lat: -12.0463, lng: -77.0428, title: 'Lima Centro' }
-  ]);
+  // Sample incident data (replace with real API data)
+  const sampleIncidents = [
+    { id: 1, lat: -13.5320, lng: -71.9675, title: 'Accidente leve', type: 'accidente' },
+    { id: 2, lat: -13.5235, lng: -71.9780, title: 'Bache grande', type: 'vialidad' },
+    { id: 3, lat: -13.5352, lng: -71.9890, title: 'Semáforo dañado', type: 'alumbrado' },
+    { id: 4, lat: -13.5280, lng: -71.9950, title: 'Choque múltiple', type: 'accidente' },
+    { id: 5, lat: -13.5370, lng: -71.9810, title: 'Vehículo abandonado', type: 'otros' }
+  ];
+
+  const [mapMarkers, setMapMarkers] = useState(sampleIncidents);
 
   const handleMapClick = (event) => {
-    // Opcional: permitir agregar marcadores al hacer click en el mapa
+    // Permitir agregar marcadores al hacer click (opcional)
     const newMarker = {
       id: mapMarkers.length + 1,
       lat: event.latLng.lat(),
       lng: event.latLng.lng(),
-      title: `Incidente #${mapMarkers.length + 1}`
+      title: `Incidente #${mapMarkers.length + 1}`,
+      type: 'otros'
     };
     setMapMarkers([...mapMarkers, newMarker]);
   };
@@ -110,26 +118,54 @@ const AuthorityDashboard = () => {
         </div>
 
         <div className="card map-card" style={{marginTop:20}}>
-          <h3>Mapa de incidencias de tránsito</h3>
-          <p className="muted" style={{marginBottom:'16px'}}>Visualiza los incidentes reportados en Lima y alrededores. Puedes hacer click en el mapa para agregar un nuevo reporte.</p>
-          <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY}>
-            <GoogleMap 
-              mapContainerStyle={mapContainerStyle} 
-              center={LIMA_COORDINATES} 
-              zoom={12}
-              onClick={handleMapClick}
-            >
-              {mapMarkers.map((marker) => (
-                <Marker
-                  key={marker.id}
-                  position={{ lat: marker.lat, lng: marker.lng }}
-                  title={marker.title}
+          <h3>Mapa de incidencias de tránsito (Cusco)</h3>
+          <p className="muted" style={{marginBottom:'16px'}}>Visualiza los incidentes reportados en Cusco. Los pines muestran el tipo de incidencia.</p>
+          {!GOOGLE_MAPS_API_KEY ? (
+            <div className="map-error">
+              <p><strong>Google Maps API Key no configurada.</strong> Usa `.env` y define `VITE_GOOGLE_MAPS_API_KEY` para ver el mapa interactivo.</p>
+              <div style={{width:'100%', height:400, borderRadius:6, overflow:'hidden', border:'1px solid #ddd'}}>
+                <iframe
+                  title="OSM Cusco fallback"
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  scrolling="no"
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${CUSCO_COORDINATES.lng-0.05}%2C${CUSCO_COORDINATES.lat-0.03}%2C${CUSCO_COORDINATES.lng+0.05}%2C${CUSCO_COORDINATES.lat+0.03}&layer=mapnik&marker=${CUSCO_COORDINATES.lat}%2C${CUSCO_COORDINATES.lng}`}
                 />
-              ))}
-            </GoogleMap>
-          </LoadScript>
+              </div>
+            </div>
+          ) : (
+            <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} onError={() => console.error('Error cargando Google Maps')}>
+              <GoogleMap
+                mapContainerStyle={mapContainerStyle}
+                center={CUSCO_COORDINATES}
+                zoom={13}
+                onClick={handleMapClick}
+              >
+                {mapMarkers.map((marker) => {
+                  // choose color by type
+                  const colorMap = {
+                    accidente: 'red',
+                    vialidad: 'orange',
+                    alumbrado: 'yellow',
+                    otros: 'blue'
+                  };
+                  const color = colorMap[marker.type] || 'purple';
+                  const iconUrl = `https://maps.google.com/mapfiles/ms/icons/${color}-dot.png`;
+                  return (
+                    <Marker
+                      key={marker.id}
+                      position={{ lat: marker.lat, lng: marker.lng }}
+                      title={marker.title}
+                      icon={{ url: iconUrl }}
+                    />
+                  );
+                })}
+              </GoogleMap>
+            </LoadScript>
+          )}
           <div style={{marginTop:'12px', fontSize:'12px', color:'#666'}}>
-            <strong>Nota:</strong> Configura tu Google Maps API Key en las variables de entorno para que el mapa funcione completamente.
+            <strong>Nota:</strong> Si deseas que estos pines vengan de la base de datos, puedo conectarlos a la API y mostrarlos dinámicamente.
           </div>
         </div>
       </div>
