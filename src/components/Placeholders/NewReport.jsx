@@ -26,6 +26,8 @@ const NewReport = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
   const [autocomplete, setAutocomplete] = useState(null);
+  const [mapLoadError, setMapLoadError] = useState(false);
+  const [useOsmFallback, setUseOsmFallback] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -181,43 +183,86 @@ const NewReport = () => {
             <label>Selecciona la ubicación en el mapa</label>
             <div className="map-controls">
               <div className="search-box">
-                <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} libraries={["places"]}>
-                  <Autocomplete onLoad={onLoadAutocomplete} onPlaceChanged={onPlaceChanged}>
-                    <input
-                      type="text"
-                      placeholder="Buscar dirección o lugar (ej: Plaza de Armas Cusco)"
-                      className="gm-search-input"
-                    />
-                  </Autocomplete>
-                </LoadScript>
+                {(!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY === 'YOUR_API_KEY_HERE') ? (
+                  <input
+                    type="text"
+                    placeholder="Introduce una dirección o activa la API Key para Autocomplete"
+                    disabled
+                    className="gm-search-input"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                ) : (
+                  <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} libraries={["places"]} onError={() => setMapLoadError(true)}>
+                    <Autocomplete onLoad={onLoadAutocomplete} onPlaceChanged={onPlaceChanged}>
+                      <input
+                        type="text"
+                        placeholder="Buscar dirección o lugar (ej: Plaza de Armas Cusco)"
+                        className="gm-search-input"
+                      />
+                    </Autocomplete>
+                  </LoadScript>
+                )}
                 <button type="button" className="btn-small" onClick={handleLocateMe}>Ubicarme</button>
               </div>
             </div>
 
-            <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} libraries={["places"]}>
-              <GoogleMap
-                mapContainerStyle={{ width: '100%', height: '400px', borderRadius: 6 }}
-                center={selectedPos}
-                zoom={13}
-                onClick={(e) => {
-                  const lat = e.latLng.lat();
-                  const lng = e.latLng.lng();
-                  setSelectedPos({ lat, lng });
-                  setForm(prev => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
-                }}
-              >
-                <Marker
-                  position={selectedPos}
-                  draggable={true}
-                  onDragEnd={(e) => {
+            {mapLoadError || (!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY === 'YOUR_API_KEY_HERE') ? (
+              <div className="map-error">
+                <p><strong>Se produjo un error al cargar Google Maps.</strong></p>
+                <p>Comprueba que `VITE_GOOGLE_MAPS_API_KEY` esté definida en tu archivo `.env` y sea válida.</p>
+                <p>Pasos rápidos:
+                  <ol>
+                    <li>Obten una API Key en Google Cloud Console y habilita <em>Maps JavaScript API</em> y <em>Places API</em>.</li>
+                    <li>Añade en la raíz del proyecto un archivo `.env` con: <code>VITE_GOOGLE_MAPS_API_KEY=TU_API_KEY</code></li>
+                    <li>Reinicia el servidor de desarrollo: <code>npm run dev</code>.</li>
+                  </ol>
+                </p>
+                <div style={{marginTop:8}}>
+                  <button type="button" className="btn-small" onClick={() => setUseOsmFallback(true)}>Usar mapa OpenStreetMap (fallback)</button>
+                </div>
+              </div>
+            ) : null}
+
+            {!useOsmFallback && (!mapLoadError && GOOGLE_MAPS_API_KEY && GOOGLE_MAPS_API_KEY !== 'YOUR_API_KEY_HERE') && (
+              <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} libraries={["places"]} onError={() => setMapLoadError(true)}>
+                <GoogleMap
+                  mapContainerStyle={{ width: '100%', height: '400px', borderRadius: 6 }}
+                  center={selectedPos}
+                  zoom={13}
+                  onClick={(e) => {
                     const lat = e.latLng.lat();
                     const lng = e.latLng.lng();
                     setSelectedPos({ lat, lng });
                     setForm(prev => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
                   }}
+                >
+                  <Marker
+                    position={selectedPos}
+                    draggable={true}
+                    onDragEnd={(e) => {
+                      const lat = e.latLng.lat();
+                      const lng = e.latLng.lng();
+                      setSelectedPos({ lat, lng });
+                      setForm(prev => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
+                    }}
+                  />
+                </GoogleMap>
+              </LoadScript>
+            )}
+
+            {useOsmFallback && (
+              <div style={{width:'100%', height:400, borderRadius:6, overflow:'hidden', border:'1px solid #ddd'}}>
+                <iframe
+                  title="OSM Cusco"
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  scrolling="no"
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${CUSCO_COORDINATES.lng-0.05}%2C${CUSCO_COORDINATES.lat-0.03}%2C${CUSCO_COORDINATES.lng+0.05}%2C${CUSCO_COORDINATES.lat+0.03}&layer=mapnik&marker=${CUSCO_COORDINATES.lat}%2C${CUSCO_COORDINATES.lng}`}
                 />
-              </GoogleMap>
-            </LoadScript>
+              </div>
+            )}
             <div style={{marginTop:8, color:'#555', fontSize:13}}>
               Coordenadas seleccionadas: {selectedPos.lat.toFixed(6)}, {selectedPos.lng.toFixed(6)}
             </div>
