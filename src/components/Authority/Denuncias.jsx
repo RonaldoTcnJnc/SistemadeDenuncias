@@ -35,7 +35,7 @@ const Denuncias = () => {
   const [selectedMarker, setSelectedMarker] = useState(null);
 
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY || undefined,
     id: 'denuncias-map'
   });
 
@@ -123,7 +123,7 @@ const Denuncias = () => {
           
           {(!GOOGLE_MAPS_API_KEY || loadError) ? (
             <div style={{padding:'20px', textAlign:'center', color:'#666'}}>
-              <p><strong>Google Maps no está disponible.</strong> Configura `VITE_GOOGLE_MAPS_API_KEY` en `.env` para ver el mapa.</p>
+              <p><strong>Google Maps no está disponible.</strong> Mostrando vista alternativa.</p>
               <div style={{width:'100%', height:400, borderRadius:8, overflow:'hidden', border:'1px solid #ddd', marginTop:'12px'}}>
                 <iframe
                   title="OSM Cusco fallback"
@@ -135,45 +135,43 @@ const Denuncias = () => {
                 />
               </div>
             </div>
+          ) : isLoaded ? (
+            <div>
+              <GoogleMap
+                mapContainerStyle={mapContainerStyle}
+                center={CUSCO_CENTER}
+                zoom={13}
+              >
+                {sample.map((denuncia) => (
+                  <Marker
+                    key={denuncia.id}
+                    position={{ lat: denuncia.lat, lng: denuncia.lng }}
+                    title={denuncia.problema}
+                    icon={{
+                      url: `https://maps.google.com/mapfiles/ms/icons/${getMarkerColor(denuncia.estado)}-dot.png`
+                    }}
+                    onClick={() => setSelectedMarker(denuncia)}
+                  >
+                    {selectedMarker && selectedMarker.id === denuncia.id && (
+                      <InfoWindow onCloseClick={() => setSelectedMarker(null)}>
+                        <div style={{fontSize:'14px', color:'#333', padding:'4px'}}>
+                          <strong>{denuncia.problema}</strong><br/>
+                          <small>{denuncia.ubicacion}</small><br/>
+                          <small>Estado: {denuncia.estado}</small>
+                        </div>
+                      </InfoWindow>
+                    )}
+                  </Marker>
+                ))}
+              </GoogleMap>
+              <div style={{marginTop:'12px', fontSize:'12px', color:'#666'}}>
+                <strong>Leyenda:</strong> <span style={{color:'green'}}>●</span> Resuelta | <span style={{color:'red'}}>●</span> Pendiente | <span style={{color:'#FFD700'}}>●</span> En Progreso
+              </div>
+            </div>
           ) : (
-            isLoaded ? (
-              <div>
-                <GoogleMap
-                  mapContainerStyle={mapContainerStyle}
-                  center={CUSCO_CENTER}
-                  zoom={13}
-                >
-                  {sample.map((denuncia) => (
-                    <Marker
-                      key={denuncia.id}
-                      position={{ lat: denuncia.lat, lng: denuncia.lng }}
-                      title={denuncia.problema}
-                      icon={{
-                        url: `https://maps.google.com/mapfiles/ms/icons/${getMarkerColor(denuncia.estado)}-dot.png`
-                      }}
-                      onClick={() => setSelectedMarker(denuncia)}
-                    >
-                      {selectedMarker && selectedMarker.id === denuncia.id && (
-                        <InfoWindow onCloseClick={() => setSelectedMarker(null)}>
-                          <div style={{fontSize:'14px', color:'#333', padding:'4px'}}>
-                            <strong>{denuncia.problema}</strong><br/>
-                            <small>{denuncia.ubicacion}</small><br/>
-                            <small>Estado: {denuncia.estado}</small>
-                          </div>
-                        </InfoWindow>
-                      )}
-                    </Marker>
-                  ))}
-                </GoogleMap>
-                <div style={{marginTop:'12px', fontSize:'12px', color:'#666'}}>
-                  <strong>Leyenda:</strong> <span style={{color:'green'}}>●</span> Resuelta | <span style={{color:'red'}}>●</span> Pendiente | <span style={{color:'#FFD700'}}>●</span> En Progreso
-                </div>
-              </div>
-            ) : (
-              <div style={{width:'100%', height:400, display:'flex', alignItems:'center', justifyContent:'center', backgroundColor:'#f5f5f5', borderRadius:'8px'}}>
-                <p>Cargando mapa...</p>
-              </div>
-            )
+            <div style={{width:'100%', height:400, display:'flex', alignItems:'center', justifyContent:'center', backgroundColor:'#f5f5f5', borderRadius:'8px'}}>
+              <p>Cargando mapa...</p>
+            </div>
           )}
         </div>
 
