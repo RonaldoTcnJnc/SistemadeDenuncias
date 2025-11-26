@@ -1,5 +1,22 @@
 import React, { useState } from 'react';
 import './NewReport.css';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Configurar icono de Leaflet
+const defaultIcon = L.icon({
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+L.Marker.prototype.options.icon = defaultIcon;
+
+// Coordenadas de Cusco, Perú
+const CUSCO_COORDINATES = [-13.5316, -71.9877];
 
 const categories = ['Vialidad', 'Alumbrado Público', 'Basura', 'Grafiti', 'Señales', 'Otros'];
 
@@ -138,7 +155,20 @@ const NewReport = () => {
             />
           </div>
 
-          <div className="map-placeholder">Mapa (aquí se integraría Mapbox/Leaflet)</div>
+          <div className="form-group">
+            <label>Selecciona la ubicación en el mapa</label>
+            <MapContainer center={CUSCO_COORDINATES} zoom={13} className="map-container">
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; OpenStreetMap contributors'
+              />
+              <Marker position={CUSCO_COORDINATES}>
+                <Popup>
+                  Cusco, Perú - Centro de la ciudad
+                </Popup>
+              </Marker>
+            </MapContainer>
+          </div>
 
           <button type="submit" className="btn-submit">Enviar denuncia</button>
         </form>
