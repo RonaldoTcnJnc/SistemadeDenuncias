@@ -159,6 +159,12 @@
   z-index: 10;
 }
 
+.map-controls { display:flex; gap:8px; align-items:center; margin-top:8px; }
+.map-controls .search-box { display:flex; gap:8px; flex:1; }
+.map-controls input[type="text"] { padding:8px 10px; border:1px solid #ddd; border-radius:6px; flex:1; }
+.btn-small { padding:8px 10px; border-radius:6px; background:#4A69FF; color:white; border:none; cursor:pointer; font-weight:600; }
+.btn-small[disabled] { opacity:0.6; cursor:default; }
+
 .btn-submit {
   padding: 0.75rem 1.5rem;
   background-color: #4A69FF;

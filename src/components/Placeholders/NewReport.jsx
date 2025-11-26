@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Configurar icono de Leaflet
+// Configurar iconos de Leaflet
 const defaultIcon = L.icon({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
@@ -12,6 +12,12 @@ const defaultIcon = L.icon({
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
   shadowSize: [41, 41]
+});
+const customIcon = L.icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+  iconSize: [34, 34],
+  iconAnchor: [17, 34],
+  popupAnchor: [0, -30]
 });
 L.Marker.prototype.options.icon = defaultIcon;
 
@@ -33,6 +39,8 @@ const NewReport = () => {
   const [submitted, setSubmitted] = useState(false);
 
   const [selectedPos, setSelectedPos] = useState(CUSCO_COORDINATES);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searching, setSearching] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -67,6 +75,43 @@ const NewReport = () => {
       });
       setSubmitted(false);
     }, 2000);
+  };
+
+  const handleLocateMe = () => {
+    if (!navigator.geolocation) return alert('Geolocalización no soportada por tu navegador');
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const { latitude, longitude } = pos.coords;
+      setSelectedPos([latitude, longitude]);
+      setForm(prev => ({ ...prev, location: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` }));
+    }, (err) => {
+      console.error(err);
+      alert('No se pudo obtener la ubicación. Comprueba permisos.');
+    });
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery || searching) return;
+    setSearching(true);
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1&addressdetails=1`;
+      const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+      const data = await res.json();
+      if (data && data.length) {
+        const item = data[0];
+        const lat = parseFloat(item.lat);
+        const lon = parseFloat(item.lon);
+        setSelectedPos([lat, lon]);
+        const display = item.display_name || `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+        setForm(prev => ({ ...prev, location: display }));
+      } else {
+        alert('No se encontraron resultados para esa búsqueda.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error en la búsqueda. Intenta de nuevo.');
+    } finally {
+      setSearching(false);
+    }
   };
 
   if (submitted) {
@@ -159,12 +204,24 @@ const NewReport = () => {
 
           <div className="form-group">
             <label>Selecciona la ubicación en el mapa</label>
+            <div className="map-controls">
+              <div className="search-box">
+                <input
+                  type="text"
+                  placeholder="Buscar dirección o lugar (ej: Plaza de Armas Cusco)"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button type="button" className="btn-small" onClick={handleSearch} disabled={searching}>{searching ? 'Buscando...' : 'Buscar'}</button>
+              </div>
+              <button type="button" className="btn-small" onClick={handleLocateMe}>Ubicarme</button>
+            </div>
+
             <MapContainer
               center={selectedPos}
               zoom={13}
               className="map-container"
-              onclick={(e) => { /* fallback: MapContainer supports lowercase onclick */ }}
-              whenCreated={(map) => { /* keep reference if needed later */ }}
+              whenCreated={(map) => { /* future ref if needed */ }}
               onClick={(e) => {
                 const { lat, lng } = e.latlng;
                 setSelectedPos([lat, lng]);
@@ -177,6 +234,7 @@ const NewReport = () => {
               />
               <Marker
                 position={selectedPos}
+                icon={customIcon}
                 draggable={true}
                 eventHandlers={{
                   dragend: (event) => {
