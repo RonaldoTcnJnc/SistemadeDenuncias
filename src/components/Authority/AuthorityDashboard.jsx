@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './AuthorityDashboard.css';
 import AuthorityLayout from './AuthorityLayout';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { FiLock, FiShield, FiClock, FiChevronRight } from 'react-icons/fi';
 
 // Reemplaza con tu Google Maps API Key
@@ -30,6 +30,11 @@ const AuthorityDashboard = () => {
   ];
 
   const [mapMarkers, setMapMarkers] = useState(sampleIncidents);
+
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+    id: 'authority-map'
+  });
 
   const handleMapClick = (event) => {
     // Permitir agregar marcadores al hacer click (opcional)
@@ -120,9 +125,9 @@ const AuthorityDashboard = () => {
         <div className="card map-card" style={{marginTop:20}}>
           <h3>Mapa de incidencias de tránsito (Cusco)</h3>
           <p className="muted" style={{marginBottom:'16px'}}>Visualiza los incidentes reportados en Cusco. Los pines muestran el tipo de incidencia.</p>
-          {!GOOGLE_MAPS_API_KEY ? (
+          {(!GOOGLE_MAPS_API_KEY || loadError) ? (
             <div className="map-error">
-              <p><strong>Google Maps API Key no configurada.</strong> Usa `.env` y define `VITE_GOOGLE_MAPS_API_KEY` para ver el mapa interactivo.</p>
+              <p><strong>Google Maps no está disponible.</strong> Comprueba la consola y la clave `VITE_GOOGLE_MAPS_API_KEY` en `.env`.</p>
               <div style={{width:'100%', height:400, borderRadius:6, overflow:'hidden', border:'1px solid #ddd'}}>
                 <iframe
                   title="OSM Cusco fallback"
@@ -135,7 +140,7 @@ const AuthorityDashboard = () => {
               </div>
             </div>
           ) : (
-            <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} onError={() => console.error('Error cargando Google Maps')}>
+            isLoaded ? (
               <GoogleMap
                 mapContainerStyle={mapContainerStyle}
                 center={CUSCO_COORDINATES}
@@ -162,7 +167,11 @@ const AuthorityDashboard = () => {
                   );
                 })}
               </GoogleMap>
-            </LoadScript>
+            ) : (
+              <div style={{width:'100%', height:400, display:'flex', alignItems:'center', justifyContent:'center'}}>
+                Cargando mapa...
+              </div>
+            )
           )}
           <div style={{marginTop:'12px', fontSize:'12px', color:'#666'}}>
             <strong>Nota:</strong> Si deseas que estos pines vengan de la base de datos, puedo conectarlos a la API y mostrarlos dinámicamente.
