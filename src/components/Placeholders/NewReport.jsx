@@ -219,7 +219,7 @@ const NewReport = () => {
               </GoogleMap>
             </LoadScript>
             <div style={{marginTop:8, color:'#555', fontSize:13}}>
-              Coordenadas seleccionadas: {selectedPos[0].toFixed(6)}, {selectedPos[1].toFixed(6)}
+              Coordenadas seleccionadas: {selectedPos.lat.toFixed(6)}, {selectedPos.lng.toFixed(6)}
             </div>
           </div>
 
