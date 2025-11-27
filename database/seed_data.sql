@@ -20,7 +20,7 @@ VALUES
 
 INSERT INTO autoridades (nombre_completo, email, telefono, numero_empleado, departamento, cargo, distrito_asignado, contraseña_hash, fecha_ingreso, verificado, activo, rol, nivel_permiso) 
 VALUES 
-('Lucía Méndez López', 'lucia.mendez@municipio.gov', '+51 991 234 567', 'AUT001', 'Alcaldía', 'DIAT', 'Norte', 'hashed_password_auth_001', NOW() - INTERVAL '3 years', TRUE, TRUE, 'Administrador', 3),
+('Lucía Méndez López', 'lucia.mendez@municipio.gov', '+51 991 234 567', 'AUT001', 'Alcaldía', 'Municipalidad', 'Norte', 'hashed_password_auth_001', NOW() - INTERVAL '3 years', TRUE, TRUE, 'Administrador', 3),
 ('Carlos Ramírez Ruiz', 'carlos.ramirez@municipio.gov', '+51 991 234 568', 'AUT002', 'Infraestructura', 'Supervisor de Vialidad', 'Norte', 'hashed_password_auth_002', NOW() - INTERVAL '2 years', TRUE, TRUE, 'Supervisor', 2),
 ('Martina Flores Quispe', 'martina.flores@municipio.gov', '+51 991 234 569', 'AUT003', 'Limpieza Pública', 'Técnico de Limpieza', 'Sur', 'hashed_password_auth_003', NOW() - INTERVAL '18 months', TRUE, TRUE, 'Técnico', 1),
 ('Jorge Ticona Apaza', 'jorge.ticona@municipio.gov', '+51 991 234 570', 'AUT004', 'Electricidad', 'Operador de Alumbrado', 'Este', 'hashed_password_auth_004', NOW() - INTERVAL '1 year', TRUE, TRUE, 'Operador', 1),

@@ -5,12 +5,12 @@ const ProfileContext = createContext();
 export const ProfileProvider = ({ children }) => {
   const [profile, setProfile] = useState({
     name: 'Lucía Méndez',
-    role: 'DIAT',
+    role: 'Municipalidad',
     district: 'Distrito Norte',
     bio: 'Responsable de coordinar las acciones municipales y atención de denuncias en su distrito.',
     avatar: 'LM',
     avatarImage: null,
-    email: 'lucia.mendez@diat.gob.pe',
+    email: 'lucia.mendez@municipalidad.gob.pe',
     phone: '+51 1 4445678'
   });
 

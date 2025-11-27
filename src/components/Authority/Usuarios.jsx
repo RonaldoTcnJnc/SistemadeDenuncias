@@ -13,7 +13,7 @@ const ROLES_PERU = {
 };
 
 const sampleUsers = [
-  { id: 'U001', name: 'María López', email: 'maria.lopez@sutran.gob.pe', role: 'diat', status: 'Activo', joined: '2023-05-12', phone: '+51 1 2345678', entity: 'DIAT' },
+  { id: 'U001', name: 'María López', email: 'maria.lopez@sutran.gob.pe', role: 'municipalidad', status: 'Activo', joined: '2023-05-12', phone: '+51 1 2345678', entity: 'Municipalidad' },
   { id: 'U002', name: 'Carlos Pérez', email: 'carlos.perez@pnp.gob.pe', role: 'fiscalia_transito', status: 'Activo', joined: '2022-11-02', phone: '+51 1 9876543', entity: 'Fiscalía de Tránsito' },
   { id: 'U003', name: 'Ana Torres', email: 'ana.torres@cusco.gob.pe', role: 'fiscalia_transito', status: 'Inactivo', joined: '2021-09-18', phone: '+51 84 123456', entity: 'Fiscalía de Tránsito' },
   { id: 'U004', name: 'Jorge Ramírez', email: 'jorge.ramirez@denuncias.gob.pe', role: 'denuncia', status: 'Activo', joined: '2024-01-08', phone: '+51 1 5551234', entity: 'Centro de Denuncias' },
