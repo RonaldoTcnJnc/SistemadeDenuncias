@@ -14,7 +14,7 @@ const PerfilAuthority = () => {
                 <div className="profile-avatar">LM</div>
                 <div>
                   <h2>Lucía Méndez</h2>
-                  <div className="muted">Alcaldesa</div>
+                  <div className="muted">DIAT</div>
                   <div className="muted">Distrito Norte</div>
                   <p className="profile-bio">Responsable de coordinar las acciones municipales y atención de denuncias en su distrito.</p>
                 </div>

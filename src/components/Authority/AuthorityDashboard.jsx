@@ -8,7 +8,7 @@ const AuthorityDashboard = () => {
   return (
     <AuthorityLayout>
       <div className="authority-dashboard-container">
-        <h1>Guía rápida: Denuncia de tránsito (Perú)</h1>
+        <h1>Guía rápida: Denuncia de tránsito</h1>
         <p className="subtitle">Pasos recomendados y documentación necesaria para presentar una denuncia de tránsito conforme a normas y buenas prácticas en Perú.</p>
 
         <div className="card steps-card">
@@ -74,9 +74,6 @@ const AuthorityDashboard = () => {
             Esta guía resume pasos habituales y buenas prácticas. Para procedimientos y requisitos formales revisa la web de tu municipalidad o consulta con la Policía Nacional / Fiscalía según el caso.
           </div>
 
-          <div style={{marginTop:16, textAlign:'right'}}>
-            <button className="start-button">Iniciar nueva denuncia</button>
-          </div>
         </div>
       </div>
     </AuthorityLayout>

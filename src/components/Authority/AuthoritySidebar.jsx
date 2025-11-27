@@ -23,7 +23,7 @@ const AuthoritySidebar = () => {
           <div className="auth-avatar">LM</div>
           <div className="auth-info">
             <div className="auth-name">Lucía Méndez</div>
-            <div className="auth-role">Alcaldesa</div>
+            <div className="auth-role">DIAT</div>
           </div>
         </div>
       </div>

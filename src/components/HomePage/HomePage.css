@@ -23,10 +23,46 @@
   z-index: 1000;
 }
 
+/* Reducir padding izquierdo solo en el header para acercar el logo al borde */
+.home-header .home-container {
+  padding-left: 8px;
+  padding-right: 20px;
+}
+
 .logo {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-weight: bold;
   font-size: 28px;
   color: var(--text-color);
+  z-index: 1100;
+}
+
+.logo-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  display: inline-block;
+}
+.logo-text { display: inline-block; }
+
+/* Contenedor a la derecha: navegación + botones */
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* Asegurar que el contenedor del header tenga suficiente padding-left
+   para que el contenido principal no quede oculto por el logo absoluto */
+.home-header .home-container {
+  padding-left: 80px; /* espacio para el logo (ajusta si quieres más/menos) */
 }
 
 .home-header nav a {

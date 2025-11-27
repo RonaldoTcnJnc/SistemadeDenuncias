@@ -122,18 +122,15 @@ const Denuncias = () => {
           <p className="muted" style={{marginBottom:'16px'}}>Visualización geográfica de todas las denuncias reportadas en Cusco. Los pines están coloreados según el estado.</p>
           
           {(!GOOGLE_MAPS_API_KEY || loadError) ? (
-            <div style={{padding:'20px', textAlign:'center', color:'#666'}}>
-              <p><strong>Google Maps no está disponible.</strong> Mostrando vista alternativa.</p>
-              <div style={{width:'100%', height:400, borderRadius:8, overflow:'hidden', border:'1px solid #ddd', marginTop:'12px'}}>
-                <iframe
-                  title="OSM Cusco fallback"
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  scrolling="no"
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${CUSCO_CENTER.lng-0.06}%2C${CUSCO_CENTER.lat-0.04}%2C${CUSCO_CENTER.lng+0.06}%2C${CUSCO_CENTER.lat+0.04}&layer=mapnik&marker=${CUSCO_CENTER.lat}%2C${CUSCO_CENTER.lng}`}
-                />
-              </div>
+            <div style={{width:'100%', height:400, borderRadius:8, overflow:'hidden', border:'1px solid #ddd'}}>
+              <iframe
+                title="OSM Cusco"
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                scrolling="no"
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${CUSCO_CENTER.lng-0.06}%2C${CUSCO_CENTER.lat-0.04}%2C${CUSCO_CENTER.lng+0.06}%2C${CUSCO_CENTER.lat+0.04}&layer=mapnik&marker=${CUSCO_CENTER.lat}%2C${CUSCO_CENTER.lng}`}
+              />
             </div>
           ) : isLoaded ? (
             <div>
@@ -173,6 +170,10 @@ const Denuncias = () => {
               <p>Cargando mapa...</p>
             </div>
           )}
+
+          <div style={{marginTop:'12px', fontSize:'12px', color:'#666'}}>
+            <strong>Leyenda:</strong> <span style={{color:'green'}}>●</span> Resuelta | <span style={{color:'red'}}>●</span> Pendiente | <span style={{color:'#FFD700'}}>●</span> En Progreso
+          </div>
         </div>
 
       </div>

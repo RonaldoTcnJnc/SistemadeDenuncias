@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './HomePage.css';
+import DenunciaLogo from '../../assets/DenunciaYa.png';
 // Importa íconos (necesitarás instalar react-icons: npm install react-icons)
 import {
   FiAlertCircle,
@@ -9,7 +10,6 @@ import {
   FiTwitter,
   FiFacebook,
   FiHome,
-  FiBarChart2,
   FiHelpCircle
 } from 'react-icons/fi';
 
@@ -24,30 +24,32 @@ const Header = () => {
     <header className="home-header">
       <div className="home-container">
         {/* Logo: enlace al inicio */}
-        <div className="logo">DenunciaYA</div>
+        <div className="logo">
+          <img src={DenunciaLogo} alt="DenunciaYA" className="logo-img" />
+          <span className="logo-text">DenunciaYA</span>
+        </div>
 
-        {/* Navegación principal: añade/elimina enlaces según necesidades */}
-        <nav className="nav-right">
-          <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
-            <FiHome size={18} />
-            <span className="link-text">Inicio</span>
-          </Link>
-          <Link to="/panel" className={`nav-link ${isActive('/panel') ? 'active' : ''}`}>
-            <FiBarChart2 size={18} />
-            <span className="link-text">Reportes</span>
-          </Link>
-          {/* Ayuda: enlace a la página de ayuda */}
-          <Link to="/ayuda" className="nav-link nav-help">
-            <FiHelpCircle size={18} />
-            <span className="link-text">Ayuda</span>
-          </Link>
-        </nav>
+        {/* Agrupar navegación y botones en la derecha */}
+        <div className="header-right">
+          {/* Navegación principal: añade/elimina enlaces según necesidades */}
+          <nav className="nav-right">
+            <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
+              <FiHome size={18} />
+              <span className="link-text">Inicio</span>
+            </Link>
+            {/* Ayuda: enlace a la página de ayuda */}
+            <Link to="/ayuda" className="nav-link nav-help">
+              <FiHelpCircle size={18} />
+              <span className="link-text">¡Ayuda!</span>
+            </Link>
+          </nav>
 
-        {/* Botones de acción: iniciar sesión, acceso autoridad, etc.
-            - Cambia rutas o estilos según tu autorización/roles */}
-        <div className="header-buttons">
-          <Link to="/iniciar-sesion-autoridad" className="btn btn-primary">Iniciar sesión (Autoridad)</Link>
-          <Link to="/iniciar-sesion" className="btn btn-secondary">Iniciar sesión</Link>
+          {/* Botones de acción: iniciar sesión, acceso autoridad, etc.
+              - Cambia rutas o estilos según tu autorización/roles */}
+          <div className="header-buttons">
+            <Link to="/iniciar-sesion-autoridad" className="btn btn-primary">Iniciar Sesión (Autoridad)</Link>
+            <Link to="/iniciar-sesion" className="btn btn-secondary">Iniciar Sesión</Link>
+          </div>
         </div>
       </div>
     </header>
@@ -57,8 +59,9 @@ const Header = () => {
 // Footer: pie de página. Actualiza enlaces sociales y texto legal según corresponda.
 const Footer = () => (
   <footer className="home-footer">
-    <div className="home-container">
-      <div className="logo">DenunciaYA</div>
+      <div className="home-container">
+      <div className="logo">
+      </div>
       <p>© 2024 DenunciaYA. Todos los derechos reservados.</p>
       <div className="social-icons">
         {/* Enlaces a redes sociales */}
@@ -86,8 +89,8 @@ const HomePage = () => {
 
           {/* Botones de acción: optimiza las rutas según UX esperado */}
           <div className="hero-buttons">
-            <Link to="/panel" className="btn btn-success">Reportar Incidencia</Link>
-            <Link to="/panel" className="btn btn-outline">Ver Reportes</Link>
+            <Link to="/nueva-denuncia" className="btn btn-success">Reportar Incidencia</Link>
+            <Link to="/mis-denuncias" className="btn btn-outline">Ver Reportes</Link>
           </div>
         </div>
       </main>
