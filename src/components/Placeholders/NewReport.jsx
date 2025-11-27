@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
 import './NewReport.css';
-import { GoogleMap, LoadScript, Marker, Autocomplete } from '@react-google-maps/api';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
-// Google Maps API Key (usa .env variable VITE_GOOGLE_MAPS_API_KEY)
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY_HERE';
+// Configurar iconos de leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
 // Coordenadas de Cusco, Perú
 const CUSCO_COORDINATES = { lat: -13.5316, lng: -71.9877 };
@@ -15,36 +22,46 @@ const NewReport = () => {
     title: '',
     description: '',
     category: categories[0],
-    photo: null,
-    photoPreview: null,
+    photos: [],
     location: ''
   });
 
   const [submitted, setSubmitted] = useState(false);
 
   const [selectedPos, setSelectedPos] = useState(CUSCO_COORDINATES);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searching, setSearching] = useState(false);
-  const [autocomplete, setAutocomplete] = useState(null);
-  const [mapLoadError, setMapLoadError] = useState(false);
-  const [useOsmFallback, setUseOsmFallback] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === 'photo' && files[0]) {
-      const file = files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
+    if (name === 'photo' && files) {
+      const newPhotos = Array.from(files).map(file => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            resolve({
+              file: file,
+              preview: reader.result
+            });
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+
+      Promise.all(newPhotos).then(loadedPhotos => {
         setForm(prev => ({
           ...prev,
-          photo: file,
-          photoPreview: reader.result
+          photos: [...prev.photos, ...loadedPhotos]
         }));
-      };
-      reader.readAsDataURL(file);
+      });
     } else {
       setForm(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  const removePhoto = (index) => {
+    setForm(prev => ({
+      ...prev,
+      photos: prev.photos.filter((_, i) => i !== index)
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -56,8 +73,7 @@ const NewReport = () => {
         title: '',
         description: '',
         category: categories[0],
-        photo: null,
-        photoPreview: null,
+        photos: [],
         location: ''
       });
       setSubmitted(false);
@@ -76,19 +92,16 @@ const NewReport = () => {
     });
   };
 
-  // handle search via Autocomplete place
-  const onLoadAutocomplete = (auto) => setAutocomplete(auto);
-  const onPlaceChanged = () => {
-    if (!autocomplete) return;
-    const place = autocomplete.getPlace();
-    if (!place.geometry || !place.geometry.location) {
-      alert('No se encontró la ubicación seleccionada en Places');
-      return;
-    }
-    const lat = place.geometry.location.lat();
-    const lng = place.geometry.location.lng();
-    setSelectedPos({ lat, lng });
-    setForm(prev => ({ ...prev, location: place.formatted_address || `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
+  // Componente para capturar clicks en el mapa
+  const MapClickHandler = () => {
+    useMapEvents({
+      click: (e) => {
+        const { lat, lng } = e.latlng;
+        setSelectedPos({ lat, lng });
+        setForm(prev => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
+      }
+    });
+    return null;
   };
 
   if (submitted) {
@@ -143,26 +156,33 @@ const NewReport = () => {
           </div>
 
           <div className="form-group">
-            <label>Foto</label>
-            <div className="upload-box">
+            <label>Fotos</label>
+            <div className="upload-box" onClick={() => document.getElementById('photo-input').click()}>
               <input
+                id="photo-input"
                 type="file"
                 name="photo"
                 accept="image/*"
                 onChange={handleChange}
+                multiple
+                style={{ display: 'none' }}
               />
-              {!form.photoPreview && <small>PNG, JPG, GIF hasta 10MB</small>}
+              <small>PNG, JPG, GIF hasta 10MB (puedes seleccionar múltiples fotos)</small>
             </div>
-            {form.photoPreview && (
-              <div className="photo-preview">
-                <img src={form.photoPreview} alt="Preview" />
-                <button
-                  type="button"
-                  className="remove-photo"
-                  onClick={() => setForm(prev => ({ ...prev, photo: null, photoPreview: null }))}
-                >
-                  ✕ Remover
-                </button>
+            {form.photos.length > 0 && (
+              <div className="photos-container">
+                {form.photos.map((photo, index) => (
+                  <div key={index} className="photo-preview">
+                    <img src={photo.preview} alt={`Preview ${index}`} />
+                    <button
+                      type="button"
+                      className="remove-photo"
+                      onClick={() => removePhoto(index)}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -183,88 +203,38 @@ const NewReport = () => {
             <label>Selecciona la ubicación en el mapa</label>
             <div className="map-controls">
               <div className="search-box">
-                {(!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY === 'YOUR_API_KEY_HERE') ? (
-                  <input
-                    type="text"
-                    placeholder="Introduce una dirección o activa la API Key para Autocomplete"
-                    disabled
-                    className="gm-search-input"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                ) : (
-                  <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} libraries={["places"]} onError={() => setMapLoadError(true)}>
-                    <Autocomplete onLoad={onLoadAutocomplete} onPlaceChanged={onPlaceChanged}>
-                      <input
-                        type="text"
-                        placeholder="Buscar dirección o lugar (ej: Plaza de Armas Cusco)"
-                        className="gm-search-input"
-                      />
-                    </Autocomplete>
-                  </LoadScript>
-                )}
+                <input
+                  type="text"
+                  placeholder="Introduce una dirección (puedes hacer click en el mapa para marcar)"
+                  className="gm-search-input"
+                  value={form.location}
+                  disabled
+                />
                 <button type="button" className="btn-small" onClick={handleLocateMe}>Ubicarme</button>
               </div>
             </div>
 
-            {mapLoadError || (!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY === 'YOUR_API_KEY_HERE') ? (
-              <div className="map-error">
-                <p><strong>Se produjo un error al cargar Google Maps.</strong></p>
-                <p>Comprueba que `VITE_GOOGLE_MAPS_API_KEY` esté definida en tu archivo `.env` y sea válida.</p>
-                <p>Pasos rápidos:
-                  <ol>
-                    <li>Obten una API Key en Google Cloud Console y habilita <em>Maps JavaScript API</em> y <em>Places API</em>.</li>
-                    <li>Añade en la raíz del proyecto un archivo `.env` con: <code>VITE_GOOGLE_MAPS_API_KEY=TU_API_KEY</code></li>
-                    <li>Reinicia el servidor de desarrollo: <code>npm run dev</code>.</li>
-                  </ol>
-                </p>
-                <div style={{marginTop:8}}>
-                  <button type="button" className="btn-small" onClick={() => setUseOsmFallback(true)}>Usar mapa OpenStreetMap (fallback)</button>
-                </div>
-              </div>
-            ) : null}
+            {/* Mapa interactivo con Leaflet - click para marcar ubicación */}
+            <MapContainer 
+              center={[CUSCO_COORDINATES.lat, CUSCO_COORDINATES.lng]} 
+              zoom={13} 
+              style={{ width: '100%', height: '400px', borderRadius: '6px', marginTop: '12px' }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              <Marker position={[selectedPos.lat, selectedPos.lng]}>
+                <Popup>
+                  Ubicación: {selectedPos.lat.toFixed(6)}, {selectedPos.lng.toFixed(6)}
+                </Popup>
+              </Marker>
+              <MapClickHandler />
+            </MapContainer>
 
-            {!useOsmFallback && (!mapLoadError && GOOGLE_MAPS_API_KEY && GOOGLE_MAPS_API_KEY !== 'YOUR_API_KEY_HERE') && (
-              <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} libraries={["places"]} onError={() => setMapLoadError(true)}>
-                <GoogleMap
-                  mapContainerStyle={{ width: '100%', height: '400px', borderRadius: 6 }}
-                  center={selectedPos}
-                  zoom={13}
-                  onClick={(e) => {
-                    const lat = e.latLng.lat();
-                    const lng = e.latLng.lng();
-                    setSelectedPos({ lat, lng });
-                    setForm(prev => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
-                  }}
-                >
-                  <Marker
-                    position={selectedPos}
-                    draggable={true}
-                    onDragEnd={(e) => {
-                      const lat = e.latLng.lat();
-                      const lng = e.latLng.lng();
-                      setSelectedPos({ lat, lng });
-                      setForm(prev => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
-                    }}
-                  />
-                </GoogleMap>
-              </LoadScript>
-            )}
-
-            {useOsmFallback && (
-              <div style={{width:'100%', height:400, borderRadius:6, overflow:'hidden', border:'1px solid #ddd'}}>
-                <iframe
-                  title="OSM Cusco"
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  scrolling="no"
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${CUSCO_COORDINATES.lng-0.05}%2C${CUSCO_COORDINATES.lat-0.03}%2C${CUSCO_COORDINATES.lng+0.05}%2C${CUSCO_COORDINATES.lat+0.03}&layer=mapnik&marker=${CUSCO_COORDINATES.lat}%2C${CUSCO_COORDINATES.lng}`}
-                />
-              </div>
-            )}
             <div style={{marginTop:8, color:'#555', fontSize:13}}>
-              Coordenadas seleccionadas: {selectedPos.lat.toFixed(6)}, {selectedPos.lng.toFixed(6)}
+              <strong>Coordenadas seleccionadas:</strong> {selectedPos.lat.toFixed(6)}, {selectedPos.lng.toFixed(6)}<br/>
+              <small>Haz click en el mapa para marcar la ubicación de la denuncia</small>
             </div>
           </div>
 
