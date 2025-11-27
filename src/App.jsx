@@ -16,13 +16,15 @@ import DashboardLayout from './components/DashboardLayout/DashboardLayout';
 import NewReport from './components/Placeholders/NewReport';
 import MyReports from './components/Placeholders/MyReports';
 import Register from './components/Placeholders/Register';
+import { ProfileProvider } from './contexts/ProfileContext';
 
 function App() {
   // Simulación de autenticación. Cambia a `true` para ver las páginas protegidas.
   const isAuthenticated = true;
 
   return (
-    <BrowserRouter>
+    <ProfileProvider>
+      <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/iniciar-sesion" element={<LoginPage />} />
@@ -94,7 +96,8 @@ function App() {
         {/* Redirección por defecto si no encuentra la ruta */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-    </BrowserRouter>
+      </BrowserRouter>
+    </ProfileProvider>
   );
 }
 

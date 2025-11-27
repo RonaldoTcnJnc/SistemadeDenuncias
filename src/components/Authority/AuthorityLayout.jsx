@@ -3,8 +3,10 @@ import AuthoritySidebar from './AuthoritySidebar';
 import './AuthorityLayout.css';
 import { FiBell } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
+import { useProfile } from '../../contexts/ProfileContext';
 
 const AuthorityLayout = ({ children }) => {
+  const { profile } = useProfile();
   const [open, setOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
@@ -132,7 +134,13 @@ const AuthorityLayout = ({ children }) => {
                 </div>
               )}
             </div>
-            <div className="header-avatar" onClick={() => setOpen(v => !v)}>LM</div>
+            <div className="header-avatar" onClick={() => setOpen(v => !v)}>
+              {profile.avatarImage ? (
+                <img src={profile.avatarImage} alt="Avatar" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+              ) : (
+                profile.avatar
+              )}
+            </div>
             {open && (
               <div className="avatar-dropdown">
                 <button className="dropdown-item" onClick={() => { setOpen(false); navigate('/perfil-autoridad'); }}>Perfil</button>

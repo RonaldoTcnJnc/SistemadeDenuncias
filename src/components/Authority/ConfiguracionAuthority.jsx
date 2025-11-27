@@ -1,7 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import AuthorityLayout from './AuthorityLayout';
 import './ConfiguracionAuthority.css';
 import { FiBell, FiLock, FiMail, FiPhone, FiMapPin, FiToggleLeft, FiToggleRight } from 'react-icons/fi';
+
+// Definición de entidades y sus categorías
+const ENTIDADES_DENUNCIAS = {
+  'pnp': {
+    nombre: 'PNP – Unidad de Tránsito',
+    descripcion: 'Reciben denuncias por accidentes, choques, atropellos, fuga, o conductores ebrios.',
+    categorias: ['Accidentes', 'Choques', 'Atropellos', 'Fuga', 'Conductor ebrio', 'Otros']
+  },
+  'fiscalia': {
+    nombre: 'Fiscalía de Tránsito',
+    descripcion: 'Interviene cuando el caso constituye delito (lesiones graves, homicidio culposo, fuga, etc.).',
+    categorias: ['Lesiones graves', 'Homicidio culposo', 'Fuga de accidente', 'Conducción bajo influencia', 'Delitos viales']
+  },
+  'municipalidad': {
+    nombre: 'Municipalidades / SAT (Lima)',
+    descripcion: 'Gestionan reclamos o apelaciones por papeletas y problemas con inspectores de tránsito.',
+    categorias: ['Apelación de papeleta', 'Reclamo por inspección', 'Estacionamiento indebido', 'Exceso de velocidad', 'Señalización', 'Otros']
+  }
+};
 
 const ConfiguracionAuthority = () => {
   const [settings, setSettings] = useState({
@@ -15,7 +34,8 @@ const ConfiguracionAuthority = () => {
     verificacionDosFac: false,
     
     // Preferencias de Reporte
-    categoriasPrioritarias: ['accidentes', 'obstrucciones'],
+    entidadPrioritaria: 'pnp',
+    categoriasPrioritarias: ['Accidentes', 'Choques'],
     radioBusqueda: 5, // km
     
     // Integración
@@ -29,6 +49,10 @@ const ConfiguracionAuthority = () => {
   });
 
   const [guardado, setGuardado] = useState(false);
+
+  const categoriasDisponibles = useMemo(() => {
+    return ENTIDADES_DENUNCIAS[settings.entidadPrioritaria]?.categorias || [];
+  }, [settings.entidadPrioritaria]);
 
   const handleToggle = (campo) => {
     setSettings(prev => ({
@@ -182,10 +206,37 @@ const ConfiguracionAuthority = () => {
           <div className="config-item">
             <div className="config-label">
               <strong>Categorías prioritarias</strong>
-              <p className="description">Selecciona los tipos de denuncias que deseas priorizar.</p>
+              <p className="description">Selecciona la entidad y los tipos de denuncias que deseas priorizar.</p>
             </div>
+
+            {/* Select de Entidades */}
+            <div className="entity-selector">
+              <label className="entity-label">Entidad responsable:</label>
+              <select 
+                value={settings.entidadPrioritaria}
+                onChange={(e) => {
+                  setSettings(prev => ({
+                    ...prev,
+                    entidadPrioritaria: e.target.value,
+                    categoriasPrioritarias: [ENTIDADES_DENUNCIAS[e.target.value].categorias[0]]
+                  }));
+                  setGuardado(false);
+                }}
+                className="select-input entity-select"
+              >
+                {Object.entries(ENTIDADES_DENUNCIAS).map(([key, { nombre }]) => (
+                  <option key={key} value={key}>{nombre}</option>
+                ))}
+              </select>
+              <p className="entity-description">
+                {ENTIDADES_DENUNCIAS[settings.entidadPrioritaria]?.descripcion}
+              </p>
+            </div>
+
+            {/* Checkboxes de Categorías */}
             <div className="checkbox-group">
-              {['accidentes', 'obstrucciones', 'exceso de velocidad', 'estacionamiento indebido', 'falta de señalización'].map(cat => (
+              <label className="checkbox-group-label">Categorías de esta entidad:</label>
+              {categoriasDisponibles.map(cat => (
                 <label key={cat} className="checkbox-label">
                   <input 
                     type="checkbox" 
@@ -205,7 +256,7 @@ const ConfiguracionAuthority = () => {
                       setGuardado(false);
                     }}
                   />
-                  <span>{cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
+                  <span>{cat}</span>
                 </label>
               ))}
             </div>

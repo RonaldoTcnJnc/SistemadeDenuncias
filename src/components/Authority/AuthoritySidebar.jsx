@@ -2,8 +2,10 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import './AuthoritySidebar.css';
 import { FiHome, FiFileText, FiBarChart2, FiUsers, FiUser, FiSettings } from 'react-icons/fi';
+import { useProfile } from '../../contexts/ProfileContext';
 
 const AuthoritySidebar = () => {
+  const { profile } = useProfile();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -20,10 +22,16 @@ const AuthoritySidebar = () => {
     <aside className="auth-sidebar">
       <div className="sidebar-header">
         <div className="auth-profile">
-          <div className="auth-avatar">LM</div>
+          <div className="auth-avatar" style={{overflow: 'hidden'}}>
+            {profile.avatarImage ? (
+              <img src={profile.avatarImage} alt="Avatar" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+            ) : (
+              profile.avatar
+            )}
+          </div>
           <div className="auth-info">
-            <div className="auth-name">Lucía Méndez</div>
-            <div className="auth-role">DIAT</div>
+            <div className="auth-name">{profile.name}</div>
+            <div className="auth-role">{profile.role}</div>
           </div>
         </div>
       </div>
