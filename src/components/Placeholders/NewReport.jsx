@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import './NewReport.css';
-import { GoogleMap, LoadScript, Marker, Autocomplete } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, Autocomplete } from '@react-google-maps/api';
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 // Google Maps API Key (usa .env variable VITE_GOOGLE_MAPS_API_KEY)
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_API_KEY_HERE';
@@ -27,7 +30,7 @@ const NewReport = () => {
   const [searching, setSearching] = useState(false);
   const [autocomplete, setAutocomplete] = useState(null);
   const [mapLoadError, setMapLoadError] = useState(false);
-  const [useOsmFallback, setUseOsmFallback] = useState(false);
+  const [useOsmFallback, setUseOsmFallback] = useState(!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY === 'YOUR_API_KEY_HERE');
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -183,16 +186,7 @@ const NewReport = () => {
             <label>Selecciona la ubicación en el mapa</label>
             <div className="map-controls">
               <div className="search-box">
-                {(!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY === 'YOUR_API_KEY_HERE') ? (
-                  <input
-                    type="text"
-                    placeholder="Introduce una dirección o activa la API Key para Autocomplete"
-                    disabled
-                    className="gm-search-input"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                ) : (
+                {!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY === 'YOUR_API_KEY_HERE' ? null : (
                   <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} libraries={["places"]} onError={() => setMapLoadError(true)}>
                     <Autocomplete onLoad={onLoadAutocomplete} onPlaceChanged={onPlaceChanged}>
                       <input
@@ -203,26 +197,9 @@ const NewReport = () => {
                     </Autocomplete>
                   </LoadScript>
                 )}
-                <button type="button" className="btn-small" onClick={handleLocateMe}>Ubicarme</button>
               </div>
             </div>
 
-            {mapLoadError || (!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY === 'YOUR_API_KEY_HERE') ? (
-              <div className="map-error">
-                <p><strong>Se produjo un error al cargar Google Maps.</strong></p>
-                <p>Comprueba que `VITE_GOOGLE_MAPS_API_KEY` esté definida en tu archivo `.env` y sea válida.</p>
-                <p>Pasos rápidos:
-                  <ol>
-                    <li>Obten una API Key en Google Cloud Console y habilita <em>Maps JavaScript API</em> y <em>Places API</em>.</li>
-                    <li>Añade en la raíz del proyecto un archivo `.env` con: <code>VITE_GOOGLE_MAPS_API_KEY=TU_API_KEY</code></li>
-                    <li>Reinicia el servidor de desarrollo: <code>npm run dev</code>.</li>
-                  </ol>
-                </p>
-                <div style={{marginTop:8}}>
-                  <button type="button" className="btn-small" onClick={() => setUseOsmFallback(true)}>Usar mapa OpenStreetMap (fallback)</button>
-                </div>
-              </div>
-            ) : null}
 
             {!useOsmFallback && (!mapLoadError && GOOGLE_MAPS_API_KEY && GOOGLE_MAPS_API_KEY !== 'YOUR_API_KEY_HERE') && (
               <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} libraries={["places"]} onError={() => setMapLoadError(true)}>
@@ -253,14 +230,33 @@ const NewReport = () => {
 
             {useOsmFallback && (
               <div style={{width:'100%', height:400, borderRadius:6, overflow:'hidden', border:'1px solid #ddd'}}>
-                <iframe
-                  title="OSM Cusco"
-                  width="100%"
-                  height="100%"
-                  frameBorder="0"
-                  scrolling="no"
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${CUSCO_COORDINATES.lng-0.05}%2C${CUSCO_COORDINATES.lat-0.03}%2C${CUSCO_COORDINATES.lng+0.05}%2C${CUSCO_COORDINATES.lat+0.03}&layer=mapnik&marker=${CUSCO_COORDINATES.lat}%2C${CUSCO_COORDINATES.lng}`}
-                />
+                <MapContainer
+                  center={[CUSCO_COORDINATES.lat, CUSCO_COORDINATES.lng]}
+                  zoom={13}
+                  style={{ width: '100%', height: '100%' }}
+                >
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  <Marker
+                    position={[selectedPos.lat, selectedPos.lng]}
+                    draggable={true}
+                    eventHandlers={{
+                      dragend: (e) => {
+                        const marker = e.target;
+                        const { lat, lng } = marker.getLatLng();
+                        setSelectedPos({ lat, lng });
+                        setForm(prev => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
+                      },
+                      click: (e) => {
+                        const { lat, lng } = e.latlng || e.target.getLatLng();
+                        setSelectedPos({ lat, lng });
+                        setForm(prev => ({ ...prev, location: `${lat.toFixed(6)}, ${lng.toFixed(6)}` }));
+                      }
+                    }}
+                  />
+                </MapContainer>
               </div>
             )}
             <div style={{marginTop:8, color:'#555', fontSize:13}}>
