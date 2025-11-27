@@ -1,5 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './components/HomePage/HomePage';
+import Ayuda from './components/Ayuda/Ayuda'; // <-- añade esto si falta
 import LoginPage from './components/LoginPage/LoginPage';
 import AuthorityLogin from './components/Authority/AuthorityLogin';
 import AuthorityDashboard from './components/Authority/AuthorityDashboard';
@@ -11,12 +12,7 @@ import ConfiguracionAuthority from './components/Authority/ConfiguracionAuthorit
 import AuthorityKnowledge from './components/Authority/AuthorityKnowledge';
 import CitizenDashboard from './components/CitizenDashboard/CitizenDashboard';
 import ProfilePage from './components/ProfilePage/ProfilePage';
-
-
-// Layout para las páginas que tienen la barra lateral
 import DashboardLayout from './components/DashboardLayout/DashboardLayout';
-
-// Placeholders (creados en src/components/Placeholders)
 import NewReport from './components/Placeholders/NewReport';
 import MyReports from './components/Placeholders/MyReports';
 import Register from './components/Placeholders/Register';
@@ -26,7 +22,7 @@ function App() {
   const isAuthenticated = true;
 
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/iniciar-sesion" element={<LoginPage />} />
@@ -93,10 +89,12 @@ function App() {
 
         <Route path="/registro" element={<Register />} />
 
+        <Route path="/ayuda" element={<Ayuda />} /> {/* <<< agregar esta ruta */}
+
         {/* Redirección por defecto si no encuentra la ruta */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 }
 
