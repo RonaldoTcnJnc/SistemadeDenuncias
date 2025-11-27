@@ -1,137 +1,140 @@
-.profile-page-container h1 {
-  font-size: 28px;
-  margin-bottom: 30px;
+/* ---------- Variables de color y atmósfera (añadir o ajustar según variables globales) ---------- */
+:root {
+  /* Colores principales y alternos */
+  --accent-green: #10b35a; /* acento verde */
+  --primary-blue: #0f6ef4; /* azul fuerte para CTAs */
+  --primary-variant: #3b82f6;
+  --muted: #6c7a7e;
+  --card-bg-soft: linear-gradient(180deg, #ffffff, #fbfcfd);
+  --glass: rgba(255,255,255,0.85);
+  --input-focus: rgba(15,110,244,0.16);
 }
 
-/* Formulario genérico */
-.form-group {
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-}
-.form-group label {
-    margin-bottom: 8px;
-    font-weight: 500;
-    font-size: 14px;
-}
-.form-group input {
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid var(--medium-gray-color);
-    font-size: 16px;
-}
-.form-group input[readOnly] {
-    background-color: var(--light-gray-color);
-}
-.btn-save {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
-    align-self: flex-end;
+/* ---------- Fondo de página sutil y profesional ---------- */
+.profile-page-wrapper {
+  /* pequeña variación de fondo para no quedar todo blanco */
+  background: linear-gradient(180deg, #f8fbfa 0%, #f0f7f6 100%);
+  border-radius: 12px;
+  padding: 20px;
 }
 
-/* Personal Info */
-.personal-info-form {
-    display: flex;
-    gap: 40px;
-    align-items: flex-start;
+/* ---------- Header: más color, contraste y jerarquía ---------- */
+.profile-header {
+  background: linear-gradient(90deg, rgba(16,179,90,0.06), rgba(59,130,246,0.03));
+  border-radius: 12px;
+  padding: 18px;
+  border-left: 6px solid var(--accent-green); /* barra lateral */
+  box-shadow: 0 8px 26px rgba(18,30,40,0.04);
 }
-.profile-picture-section {
-    text-align: center;
-    position: relative;
-    width: 150px;
-    flex-shrink: 0;
+
+/* Título con color y mayor peso */
+.profile-title {
+  color: var(--primary-blue); /* titulo más marcado */
+  text-transform: none;
+  letter-spacing: -0.2px;
 }
-.profile-picture-section img {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 4px solid var(--medium-gray-color);
-    object-fit: cover;
+
+/* Subtítulo más legible y suave */
+.profile-subtitle {
+  color: var(--muted);
+  opacity: 0.95;
 }
+
+/* Avatar con borde y anillo de color */
+.avatar-wrapper {
+  background: var(--glass);
+  border-radius: 14px;
+  padding: 8px;
+  box-shadow: 0 12px 26px rgba(11, 66, 62, 0.06);
+}
+.avatar-img {
+  border-radius: 999px;
+  border: 4px solid rgba(16,179,90,0.12);
+  box-shadow: 0 8px 28px rgba(16,179,90,0.08);
+}
+
+/* Botón de editar con gradiente y hover */
 .btn-edit-pic {
-    position: absolute;
-    bottom: 50px;
-    right: 10px;
-    background-color: var(--primary-color);
-    color: white;
-    border: 2px solid white;
-    border-radius: 50%;
-    width: 35px;
-    height: 35px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  background: linear-gradient(90deg, var(--accent-green), #38b27a);
+  box-shadow: 0 10px 26px rgba(16,179,90,0.12);
+  border: none;
 }
-.profile-picture-section p {
-    font-size: 12px;
-    color: var(--dark-gray-color);
-    margin-top: 10px;
-}
-.info-fields {
-    flex-grow: 1;
+.btn-edit-pic:hover {
+  transform: translateY(-3px);
 }
 
-/* Password Form */
-.form-group-inline {
-    display: flex;
-    gap: 20px;
-}
-.form-group-inline .form-group {
-    flex: 1;
+/* ---------- Tarjetas con color y bordes suaves ---------- */
+.card {
+  background: var(--card-bg-soft);
+  border-radius: 12px;
+  border: 1px solid rgba(10,20,30,0.03);
 }
 
-/* Notification Prefs */
-.pref-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 0;
-    border-bottom: 1px solid var(--medium-gray-color);
-}
-.pref-item:last-of-type {
-    border-bottom: none;
-    margin-bottom: 20px;
-}
-.pref-item p {
-    margin: 5px 0 0 0;
-    color: var(--dark-gray-color);
-    font-size: 14px;
+/* Un pequeño acento visual en las tarjetas para jerarquizar */
+.card + .card {
+  border-left: 6px solid rgba(59,130,246,0.06);
 }
 
-/* Toggle Switch */
-.switch { position: relative; display: inline-block; width: 50px; height: 28px; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
-.slider.round { border-radius: 34px; }
-.slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-input:checked + .slider { background-color: var(--primary-color); }
-input:checked + .slider:before { transform: translateX(22px); }
+/* Inputs con borde y foco de color para mejor UX */
+.form-group input {
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary-variant);
+  box-shadow: 0 6px 26px var(--input-focus);
+}
 
-/* Danger Zone */
-.danger-zone {
-    border: 1px solid var(--danger-color);
-    border-left: 4px solid var(--danger-color);
+/* Botones CTA más llamativos y con gradiente */
+.btn-primary {
+  background: linear-gradient(90deg, var(--primary-blue), var(--primary-variant));
+  box-shadow: 0 14px 34px rgba(15,110,244,0.12);
+  border-radius: 10px;
 }
-.danger-zone h3 {
-    color: var(--danger-color);
+.btn-primary:hover {
+  transform: translateY(-3px);
 }
-.danger-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+
+/* Botón de peligro (mantener rojo pero con matiz) */
 .btn-danger {
-    background-color: var(--danger-color);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
+  background: linear-gradient(90deg, #ef4444, #f97316);
+  box-shadow: 0 14px 34px rgba(249, 115, 22, 0.08);
+}
+
+/* Preferencias: tarjeta con borde sutil y color al activar */
+.pref-item {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.99));
+  border-radius: 10px;
+  padding: 12px;
+}
+.pref-item.active { /* si añades clase active en JS / React para destacar */
+  border-left: 6px solid var(--accent-green);
+  background: linear-gradient(90deg, rgba(16,179,90,0.03), rgba(255,255,255,0.98));
+}
+
+/* Pequeña etiqueta de estado (ej: verificada, pública, privada) */
+.status-badge {
+  display:inline-block;
+  font-weight:800;
+  padding:4px 8px;
+  border-radius: 999px;
+  font-size:12px;
+  color:#fff;
+}
+.status-badge.primary { background: var(--primary-variant); }
+.status-badge.success { background: var(--accent-green); }
+.status-badge.warn { background: #f59e0b; }
+.status-badge.danger { background: var(--danger-color); }
+
+/* Separadores menos rígidos: lineas de color suave */
+.pref-item + .pref-item {
+  margin-top: 8px;
+}
+
+/* ---------- Responsive: mantener colores agradables en dispositivos pequeños ---------- */
+@media (max-width: 860px) {
+  .profile-page-wrapper { padding: 12px; }
+  .profile-header { border-left-width: 4px; padding: 12px; }
+  .avatar-img { width: 72px; height: 72px; border-radius: 999px; }
+  .btn-primary { padding: 10px 12px; }
 }
