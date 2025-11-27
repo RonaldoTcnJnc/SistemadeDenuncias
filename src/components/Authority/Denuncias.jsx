@@ -1,10 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import AuthorityLayout from './AuthorityLayout';
 import './Denuncias.css';
-import { GoogleMap, Marker, useJsApiLoader, InfoWindow } from '@react-google-maps/api';
-
-// Google Maps API Key
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 // Coordenadas de Cusco, Perú
 const CUSCO_CENTER = {
@@ -12,10 +11,34 @@ const CUSCO_CENTER = {
   lng: -71.9877
 };
 
-const mapContainerStyle = {
-  width: '100%',
-  height: '400px',
-  borderRadius: '8px'
+// Crear iconos personalizados para cada estado
+const createMarkerIcon = (estado) => {
+  const colorMap = {
+    'Resuelta': '#22c55e',      // Verde
+    'Pendiente': '#ef4444',     // Rojo
+    'En Progreso': '#eab308'    // Amarillo
+  };
+  
+  const color = colorMap[estado] || '#3b82f6';
+  
+  return L.divIcon({
+    html: `<div style="
+      background-color: ${color};
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 3px solid white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    ">${estado.charAt(0)}</div>`,
+    iconSize: [32, 32],
+    className: 'custom-marker'
+  });
 };
 
 const sample = [
@@ -32,12 +55,6 @@ const Denuncias = () => {
   const [query, setQuery] = useState('');
   const [estado, setEstado] = useState('Todos');
   const [distrito, setDistrito] = useState('Todos');
-  const [selectedMarker, setSelectedMarker] = useState(null);
-
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY || undefined,
-    id: 'denuncias-map'
-  });
 
   const estados = ['Todos', 'Resuelta', 'Pendiente', 'En Progreso'];
   const distritos = useMemo(() => ['Todos', ...Array.from(new Set(sample.map(s => s.distrito)))], []);
@@ -63,10 +80,51 @@ const Denuncias = () => {
       case 'Pendiente':
         return 'red';
       case 'En Progreso':
-        return 'yellow';
+        return 'gold';
       default:
         return 'blue';
     }
+  };
+
+  // Mapa interactivo con Leaflet
+  const MapComponent = () => {
+    return (
+      <MapContainer 
+        center={[CUSCO_CENTER.lat, CUSCO_CENTER.lng]} 
+        zoom={13} 
+        style={{ width: '100%', height: '500px', borderRadius: '8px' }}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        {sample.map((denuncia) => (
+          <Marker 
+            key={denuncia.id}
+            position={[denuncia.lat, denuncia.lng]}
+            icon={createMarkerIcon(denuncia.estado)}
+          >
+            <Popup>
+              <div style={{ fontSize: '12px', minWidth: '200px' }}>
+                <strong>{denuncia.problema}</strong><br/>
+                <small><strong>ID:</strong> {denuncia.id}</small><br/>
+                <small><strong>Ubicación:</strong> {denuncia.ubicacion}</small><br/>
+                <small><strong>Distrito:</strong> {denuncia.distrito}</small><br/>
+                <small><strong>Estado:</strong> <span style={{
+                  padding: '2px 6px',
+                  borderRadius: '3px',
+                  backgroundColor: denuncia.estado === 'Resuelta' ? '#dcfce7' : 
+                                    denuncia.estado === 'Pendiente' ? '#fee2e2' : '#fef3c7',
+                  color: denuncia.estado === 'Resuelta' ? '#166534' :
+                         denuncia.estado === 'Pendiente' ? '#991b1b' : '#92400e'
+                }}>{denuncia.estado}</span></small><br/>
+                <small><strong>Fecha:</strong> {denuncia.fecha}</small>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    );
   };
 
   return (
@@ -86,21 +144,33 @@ const Denuncias = () => {
             <div className="stat-value">{totals.pendientes}</div>
           </div>
         </div>
+
         <div className="card">
           <h3>Listado de Denuncias</h3>
           <div className="filters-row">
-            <input placeholder="Buscar por problema, ubicación o id" value={query} onChange={e=>setQuery(e.target.value)} />
-            <select value={estado} onChange={e=>setEstado(e.target.value)}>
-              {estados.map(e=> <option key={e} value={e}>{e}</option>)}
+            <input 
+              placeholder="Buscar por problema, ubicación o id" 
+              value={query} 
+              onChange={e => setQuery(e.target.value)} 
+            />
+            <select value={estado} onChange={e => setEstado(e.target.value)}>
+              {estados.map(e => <option key={e} value={e}>{e}</option>)}
             </select>
-            <select value={distrito} onChange={e=>setDistrito(e.target.value)}>
-              {distritos.map(d=> <option key={d} value={d}>{d}</option>)}
+            <select value={distrito} onChange={e => setDistrito(e.target.value)}>
+              {distritos.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
 
           <table className="denuncias-table">
             <thead>
-              <tr><th>ID</th><th>Problema</th><th>Ubicación</th><th>Distrito</th><th>Estado</th><th>Fecha</th></tr>
+              <tr>
+                <th>ID</th>
+                <th>Problema</th>
+                <th>Ubicación</th>
+                <th>Distrito</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+              </tr>
             </thead>
             <tbody>
               {filtered.map(r => (
@@ -109,7 +179,19 @@ const Denuncias = () => {
                   <td>{r.problema}</td>
                   <td>{r.ubicacion}</td>
                   <td>{r.distrito}</td>
-                  <td><span className={`badge ${r.estado === 'Resuelta' ? 'badge--resuelta' : r.estado === 'Pendiente' ? 'badge--pendiente' : 'badge--enprogreso'}`}>{r.estado}</span></td>
+                  <td>
+                    <span 
+                      className={`badge ${
+                        r.estado === 'Resuelta' 
+                          ? 'badge--resuelta' 
+                          : r.estado === 'Pendiente' 
+                          ? 'badge--pendiente' 
+                          : 'badge--enprogreso'
+                      }`}
+                    >
+                      {r.estado}
+                    </span>
+                  </td>
                   <td>{r.fecha}</td>
                 </tr>
               ))}
@@ -119,63 +201,37 @@ const Denuncias = () => {
 
         <div className="card map-card">
           <h3>Mapa de Denuncias (Cusco)</h3>
-          <p className="muted" style={{marginBottom:'16px'}}>Visualización geográfica de todas las denuncias reportadas en Cusco. Los pines están coloreados según el estado.</p>
+          <p className="muted" style={{ marginBottom: '16px' }}>
+            Visualización geográfica de todas las denuncias reportadas en Cusco. Los pines están coloreados según el estado.
+          </p>
           
-          {(!GOOGLE_MAPS_API_KEY || loadError) ? (
-            <div style={{width:'100%', height:400, borderRadius:8, overflow:'hidden', border:'1px solid #ddd'}}>
-              <iframe
-                title="OSM Cusco"
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                scrolling="no"
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${CUSCO_CENTER.lng-0.06}%2C${CUSCO_CENTER.lat-0.04}%2C${CUSCO_CENTER.lng+0.06}%2C${CUSCO_CENTER.lat+0.04}&layer=mapnik&marker=${CUSCO_CENTER.lat}%2C${CUSCO_CENTER.lng}`}
-              />
-            </div>
-          ) : isLoaded ? (
-            <div>
-              <GoogleMap
-                mapContainerStyle={mapContainerStyle}
-                center={CUSCO_CENTER}
-                zoom={13}
-              >
-                {sample.map((denuncia) => (
-                  <Marker
-                    key={denuncia.id}
-                    position={{ lat: denuncia.lat, lng: denuncia.lng }}
-                    title={denuncia.problema}
-                    icon={{
-                      url: `https://maps.google.com/mapfiles/ms/icons/${getMarkerColor(denuncia.estado)}-dot.png`
-                    }}
-                    onClick={() => setSelectedMarker(denuncia)}
-                  >
-                    {selectedMarker && selectedMarker.id === denuncia.id && (
-                      <InfoWindow onCloseClick={() => setSelectedMarker(null)}>
-                        <div style={{fontSize:'14px', color:'#333', padding:'4px'}}>
-                          <strong>{denuncia.problema}</strong><br/>
-                          <small>{denuncia.ubicacion}</small><br/>
-                          <small>Estado: {denuncia.estado}</small>
-                        </div>
-                      </InfoWindow>
-                    )}
-                  </Marker>
-                ))}
-              </GoogleMap>
-              <div style={{marginTop:'12px', fontSize:'12px', color:'#666'}}>
-                <strong>Leyenda:</strong> <span style={{color:'green'}}>●</span> Resuelta | <span style={{color:'red'}}>●</span> Pendiente | <span style={{color:'#FFD700'}}>●</span> En Progreso
-              </div>
-            </div>
-          ) : (
-            <div style={{width:'100%', height:400, display:'flex', alignItems:'center', justifyContent:'center', backgroundColor:'#f5f5f5', borderRadius:'8px'}}>
-              <p>Cargando mapa...</p>
-            </div>
-          )}
+          {/* Mapa interactivo con React Leaflet */}
+          <MapComponent />
 
-          <div style={{marginTop:'12px', fontSize:'12px', color:'#666'}}>
-            <strong>Leyenda:</strong> <span style={{color:'green'}}>●</span> Resuelta | <span style={{color:'red'}}>●</span> Pendiente | <span style={{color:'#FFD700'}}>●</span> En Progreso
+          <div style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+            <div style={{ padding: '12px', backgroundColor: '#f0fdf4', borderRadius: '6px', borderLeft: '4px solid #22c55e' }}>
+              <strong style={{ color: '#166534' }}>● Resuelta</strong>
+              <p style={{ fontSize: '12px', color: '#4b5563', marginTop: '4px' }}>Denuncias completadas</p>
+            </div>
+            <div style={{ padding: '12px', backgroundColor: '#fef2f2', borderRadius: '6px', borderLeft: '4px solid #ef4444' }}>
+              <strong style={{ color: '#991b1b' }}>● Pendiente</strong>
+              <p style={{ fontSize: '12px', color: '#4b5563', marginTop: '4px' }}>Denuncias sin asignar</p>
+            </div>
+            <div style={{ padding: '12px', backgroundColor: '#fefce8', borderRadius: '6px', borderLeft: '4px solid #eab308' }}>
+              <strong style={{ color: '#92400e' }}>● En Progreso</strong>
+              <p style={{ fontSize: '12px', color: '#4b5563', marginTop: '4px' }}>Denuncias en proceso</p>
+            </div>
+          </div>
+
+          <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#f5f5f5', borderRadius: '4px', fontSize: '12px' }}>
+            <strong>Información:</strong>
+            <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
+              <li><strong>Ubicación:</strong> Cusco, Perú (13.5316°S, 71.9877°O)</li>
+              <li><strong>Denuncias mostradas:</strong> {sample.length}</li>
+              <li><strong>Instrucciones:</strong> Haz clic en cualquier marcador para ver detalles de la denuncia</li>
+            </ul>
           </div>
         </div>
-
       </div>
     </AuthorityLayout>
   );
