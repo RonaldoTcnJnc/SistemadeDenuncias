@@ -7,9 +7,15 @@ const { Pool } = pg;
 
 console.log('--- DB CONFIG ---');
 // Configuración flexible: usa DATABASE_URL (Render/Railway/Heroku) o variables individuales
-const connectionConfig = process.env.DATABASE_URL
+const databaseUrl = process.env.DATABASE_URL;
+
+console.log('DATABASE_URL exists:', !!databaseUrl);
+
+const isProduction = process.env.NODE_ENV === 'production';
+
+const connectionConfig = databaseUrl
   ? {
-    connectionString: process.env.DATABASE_URL,
+    connectionString: databaseUrl,
     ssl: isProduction ? { rejectUnauthorized: false } : false
   }
   : {
