@@ -46,15 +46,37 @@ const __dirname = path.dirname(__filename);
 app.get('/api/db-init', async (req, res) => {
   try {
     const sqlPath = path.join(__dirname, '..', 'database', 'init.sql');
-    if (!fs.existsSync(sqlPath)) return res.status(404).json({ error: 'init.sql not found' });
 
-    const sql = fs.readFileSync(sqlPath, 'utf8');
+    // 1. Check file existence
+    if (!fs.existsSync(sqlPath)) {
+      return res.status(404).json({ error: 'init.sql not found', path: sqlPath });
+    }
+
+    // 2. Test DB Connection
+    try {
+      await pool.query('SELECT NOW()');
+    } catch (dbErr) {
+      return res.status(500).json({
+        error: 'Database connection failed',
+        details: JSON.stringify(dbErr, Object.getOwnPropertyNames(dbErr))
+      });
+    }
+
+    // 3. Execute SQL
+    let sql = fs.readFileSync(sqlPath, 'utf8');
+    // Remove BOM (Byte Order Mark) if present - fixes "syntax error at or near... "
+    sql = sql.replace(/^\uFEFF/, '');
+
     await pool.query(sql);
 
     res.json({ success: true, message: 'Database initialized successfully!' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: 'Initialization failed',
+      details: JSON.stringify(err, Object.getOwnPropertyNames(err)),
+      message: err.message
+    });
   }
 });
 // ------------------------------------------
