@@ -1,72 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './MyReports.css';
-
-const sampleReports = [
-  {
-    id: 1,
-    title: 'Poste de luz caído',
-    category: 'Alumbrado Público',
-    date: '15/05/2024',
-    status: 'Pendiente',
-    description: 'El poste de luz en la esquina se encuentra completamente caído.',
-    location: 'Av. Principal esq. Calle 1'
-  },
-  {
-    id: 2,
-    title: 'Acumulación de basura en esquina',
-    category: 'Basura',
-    date: '12/05/2024',
-    status: 'En Proceso',
-    description: 'Gran cantidad de basura acumulada generando malos olores.',
-    location: 'Calle 5 y Av. Central'
-  },
-  {
-    id: 3,
-    title: 'Bache peligroso en Av. Principal',
-    category: 'Vialidad',
-    date: '03/05/2024',
-    status: 'Resuelto',
-    description: 'Bache de gran tamaño que ocupa medio carril.',
-    location: 'Av. Principal #123'
-  }
-];
 
 const statusClass = (s) => {
   if (s === 'Pendiente') return 'status pendiente';
-  if (s === 'En Proceso') return 'status in-process';
+  if (s === 'En Progreso' || s === 'En Proceso') return 'status in-process';
   return 'status resolved';
 };
 
 const ReportDetails = ({ report, onClose }) => {
   if (!report) return null;
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('es-PE');
+  };
+
   return (
     <div className="report-details-overlay" onClick={onClose}>
       <div className="report-details-dialog" onClick={e => e.stopPropagation()}>
         <div className="report-details-header">
-          <h2>{report.title}</h2>
+          <h2>{report.titulo || report.title}</h2>
           <button className="close-button" onClick={onClose}>&times;</button>
         </div>
         <div className="report-details-content">
           <div className="detail-group">
             <label>Estado</label>
-            <p><span className={statusClass(report.status)}>{report.status}</span></p>
+            <p><span className={statusClass(report.estado || report.status)}>{report.estado || report.status}</span></p>
           </div>
           <div className="detail-group">
             <label>Categoría</label>
-            <p>{report.category}</p>
+            <p>{report.categoria || report.category}</p>
           </div>
           <div className="detail-group">
             <label>Fecha de reporte</label>
-            <p>{report.date}</p>
+            <p>{formatDate(report.fecha_reporte || report.date)}</p>
           </div>
           <div className="detail-group">
             <label>Descripción</label>
-            <p>{report.description}</p>
+            <p>{report.descripcion || report.description}</p>
           </div>
           <div className="detail-group">
             <label>Ubicación</label>
-            <p>{report.location}</p>
+            <p>{report.ubicacion || report.location}</p>
           </div>
         </div>
       </div>
@@ -75,12 +51,55 @@ const ReportDetails = ({ report, onClose }) => {
 };
 
 const MyReports = () => {
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedReport, setSelectedReport] = useState(null);
   const [filterStatus, setFilterStatus] = useState('');
 
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+          setError('No has iniciado sesión');
+          setLoading(false);
+          return;
+        }
+
+        const user = JSON.parse(userStr);
+
+        const response = await fetch('/api/denuncias');
+        if (!response.ok) {
+          throw new Error('Error al cargar denuncias');
+        }
+
+        const allDenuncias = await response.json();
+        const userReports = allDenuncias.filter(d => d.ciudadano_id === user.id);
+
+        setReports(userReports);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching reports:', err);
+        setError('Error al cargar tus denuncias');
+        setLoading(false);
+      }
+    };
+
+    fetchReports();
+  }, []);
+
+  if (loading) {
+    return <div className="myreports-page"><p>Cargando tus denuncias...</p></div>;
+  }
+
+  if (error) {
+    return <div className="myreports-page"><p style={{ color: 'red' }}>{error}</p></div>;
+  }
+
   const filteredReports = filterStatus
-    ? sampleReports.filter(r => r.status === filterStatus)
-    : sampleReports;
+    ? reports.filter(r => (r.estado || r.status) === filterStatus)
+    : reports;
 
   return (
     <div className="myreports-page">
@@ -91,8 +110,8 @@ const MyReports = () => {
           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="filter-select">
             <option value="">Todos los estados</option>
             <option value="Pendiente">Pendiente</option>
-            <option value="En Proceso">En Proceso</option>
-            <option value="Resuelto">Resuelto</option>
+            <option value="En Progreso">En Progreso</option>
+            <option value="Resuelta">Resuelta</option>
           </select>
         </div>
         <div className="reports-list">
@@ -104,18 +123,18 @@ const MyReports = () => {
               style={{ cursor: 'pointer' }}
             >
               <div className="report-info">
-                <h4>{r.title}</h4>
-                <p className="meta">{r.category} - Reportado el {r.date}</p>
+                <h4>{r.titulo || r.title}</h4>
+                <p className="meta">{r.categoria || r.category} - Reportado el {new Date(r.fecha_reporte || r.date).toLocaleDateString('es-PE')}</p>
               </div>
               <div className="report-actions">
-                <span className={statusClass(r.status)}>{r.status}</span>
+                <span className={statusClass(r.estado || r.status)}>{r.estado || r.status}</span>
               </div>
             </div>
           ))}
         </div>
         {filteredReports.length === 0 && (
           <div className="no-reports">
-            <p>No hay denuncias con ese estado</p>
+            <p>No hay denuncias {filterStatus ? 'con ese estado' : 'registradas'}</p>
           </div>
         )}
       </div>
