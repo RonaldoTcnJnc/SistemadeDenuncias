@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './components/HomePage/HomePage';
 import Ayuda from './components/Ayuda/Ayuda'; // <-- añade esto si falta
@@ -18,8 +19,19 @@ import MyReports from './components/Placeholders/MyReports';
 import Register from './components/Placeholders/Register';
 
 function App() {
-  // Simulación de autenticación. Cambia a `true` para ver las páginas protegidas.
-  const isAuthenticated = true;
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+
+  useEffect(() => {
+    const checkAuth = () => {
+      setIsAuthenticated(!!localStorage.getItem('token'));
+    };
+    // Revisar al montar
+    checkAuth();
+
+    // Escuchar evento personalizado para login/logout sin recargar
+    window.addEventListener('auth-change', checkAuth);
+    return () => window.removeEventListener('auth-change', checkAuth);
+  }, []);
 
   return (
     <BrowserRouter>
