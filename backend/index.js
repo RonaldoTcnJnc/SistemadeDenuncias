@@ -35,6 +35,30 @@ app.use(express.json({ limit: '10mb' }));
 
 app.get('/api/health', (req, res) => res.json({ ok: true, time: new Date() }));
 
+// --- SETUP DATABASE ENDPOINT (TEMPORAL) ---
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.get('/api/db-init', async (req, res) => {
+  try {
+    const sqlPath = path.join(__dirname, '..', 'database', 'init.sql');
+    if (!fs.existsSync(sqlPath)) return res.status(404).json({ error: 'init.sql not found' });
+
+    const sql = fs.readFileSync(sqlPath, 'utf8');
+    await pool.query(sql);
+
+    res.json({ success: true, message: 'Database initialized successfully!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+// ------------------------------------------
+
 // Obtener denuncias
 app.get('/api/denuncias', async (req, res) => {
   try {
