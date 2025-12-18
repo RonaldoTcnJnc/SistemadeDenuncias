@@ -1,10 +1,15 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import pool from './db.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
+const JWT_SECRET = process.env.JWT_SECRET || 'secret_key_dev_123';
+
+// ... (existing CORS setup)
 
 // Configurar CORS manualmente (sin dependencias adicionales)
 app.use((req, res, next) => {
@@ -140,5 +145,76 @@ app.post('/api/asignar', async (req, res) => {
     res.status(500).json({ error: 'Error al asignar denuncia' });
   }
 });
+// --- AUTHENTICATION ---
+
+// Endpoint auxiliar para resetear contraseñas en DB (SOLO DEV)
+app.get('/api/auth/reset-passwords-dev', async (req, res) => {
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash('123456', salt);
+
+    await pool.query('UPDATE ciudadanos SET "contraseña_hash" = $1', [hash]);
+    await pool.query('UPDATE autoridades SET "contraseña_hash" = $1', [hash]);
+
+    res.json({ success: true, message: 'Todas las contraseñas actualizadas a "123456"' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error reset', details: err.message });
+  }
+});
+
+// Login
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password, type } = req.body; // type: 'ciudadano' | 'autoridad'
+
+    if (!email || !password) return res.status(400).json({ error: 'Faltan credenciales' });
+
+    let user = null;
+    let table = type === 'autoridad' ? 'autoridades' : 'ciudadanos';
+
+    // Buscar usuario
+    const result = await pool.query(`SELECT * FROM ${table} WHERE email = $1`, [email]);
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Usuario no encontrado' });
+    }
+
+    user = result.rows[0];
+
+    // Verificar password
+    // Nota: en init.sql las contraseñas eran texto plano "hashed_password_...".
+    // El script /api/auth/reset-passwords-dev las convertirá a hashes reales.
+    const validPassword = await bcrypt.compare(password, user.contraseña_hash);
+
+    if (!validPassword) {
+      return res.status(401).json({ error: 'Contraseña incorrecta' });
+    }
+
+    // Generar Token
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: type === 'autoridad' ? user.rol : 'ciudadano' },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        nombre: user.nombre_completo,
+        email: user.email,
+        role: type === 'autoridad' ? user.rol : 'ciudadano'
+      }
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error de servidor', details: err.message });
+  }
+});
+
+// ----------------------
 
 app.listen(PORT, () => console.log(`Backend escuchando en http://localhost:${PORT}`));
