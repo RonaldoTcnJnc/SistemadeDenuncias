@@ -64,20 +64,62 @@ const NewReport = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Denuncia enviada:', form);
-    setSubmitted(true);
-    setTimeout(() => {
-      setForm({
-        title: '',
-        description: '',
-        category: categories[0],
-        photos: [],
-        location: ''
+
+    try {
+      // Obtener usuario actual del localStorage
+      const userStr = localStorage.getItem('user');
+      if (!userStr) {
+        alert('Debes iniciar sesión para crear una denuncia');
+        return;
+      }
+
+      const user = JSON.parse(userStr);
+
+      // Preparar datos para enviar
+      const denunciaData = {
+        ciudadano_id: user.id,
+        titulo: form.title,
+        descripcion: form.description,
+        categoria: form.category,
+        ubicacion: form.location || `Lat: ${selectedPos.lat.toFixed(4)}, Lng: ${selectedPos.lng.toFixed(4)}`,
+        latitud: selectedPos.lat,
+        longitud: selectedPos.lng,
+        distrito: 'Norte', // Por ahora fijo, se puede mejorar con geocoding
+        prioridad: 'Media'
+      };
+
+      const response = await fetch('/api/denuncias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(denunciaData)
       });
-      setSubmitted(false);
-    }, 2000);
+
+      if (!response.ok) {
+        throw new Error('Error al crear la denuncia');
+      }
+
+      const result = await response.json();
+      console.log('Denuncia creada exitosamente:', result);
+
+      setSubmitted(true);
+      setTimeout(() => {
+        setForm({
+          title: '',
+          description: '',
+          category: categories[0],
+          photos: [],
+          location: ''
+        });
+        setSelectedPos(CUSCO_COORDINATES);
+        setSubmitted(false);
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error al enviar denuncia:', error);
+      alert('Hubo un error al crear la denuncia. Por favor intenta de nuevo.');
+    }
   };
 
   const handleLocateMe = () => {
@@ -215,9 +257,9 @@ const NewReport = () => {
             </div>
 
             {/* Mapa interactivo con Leaflet - click para marcar ubicación */}
-            <MapContainer 
-              center={[CUSCO_COORDINATES.lat, CUSCO_COORDINATES.lng]} 
-              zoom={13} 
+            <MapContainer
+              center={[CUSCO_COORDINATES.lat, CUSCO_COORDINATES.lng]}
+              zoom={13}
               style={{ width: '100%', height: '400px', borderRadius: '6px', marginTop: '12px' }}
             >
               <TileLayer
@@ -232,8 +274,8 @@ const NewReport = () => {
               <MapClickHandler />
             </MapContainer>
 
-            <div style={{marginTop:8, color:'#555', fontSize:13}}>
-              <strong>Coordenadas seleccionadas:</strong> {selectedPos.lat.toFixed(6)}, {selectedPos.lng.toFixed(6)}<br/>
+            <div style={{ marginTop: 8, color: '#555', fontSize: 13 }}>
+              <strong>Coordenadas seleccionadas:</strong> {selectedPos.lat.toFixed(6)}, {selectedPos.lng.toFixed(6)}<br />
               <small>Haz click en el mapa para marcar la ubicación de la denuncia</small>
             </div>
           </div>
