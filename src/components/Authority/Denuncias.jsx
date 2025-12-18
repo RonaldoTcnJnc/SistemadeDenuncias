@@ -236,7 +236,7 @@ const Denuncias = () => {
             <strong>Información:</strong>
             <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
               <li><strong>Ubicación:</strong> Cusco, Perú (13.5316°S, 71.9877°O)</li>
-              <li><strong>Denuncias mostradas:</strong> {sample.length}</li>
+              <li><strong>Denuncias mostradas:</strong> {filtered.length}</li>
               <li><strong>Instrucciones:</strong> Haz clic en cualquier marcador para ver detalles de la denuncia</li>
             </ul>
           </div>
