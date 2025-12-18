@@ -88,17 +88,31 @@ const ProfilePage = () => {
         body: JSON.stringify(formData)
       });
 
-      if (!response.ok) throw new Error('Error al actualizar perfil');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al actualizar perfil');
+      }
 
-      // Actualizar localStorage
-      const updatedUser = { ...user, ...formData };
+      // Obtener datos actualizados del servidor
+      const updatedData = await response.json();
+
+      // Actualizar localStorage con datos del servidor
+      const updatedUser = { ...user, ...updatedData };
       localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
+      setFormData({
+        nombre_completo: updatedData.nombre_completo || '',
+        email: updatedData.email || '',
+        telefono: updatedData.telefono || '',
+        direccion: updatedData.direccion || '',
+        ciudad: updatedData.ciudad || '',
+        distrito: updatedData.distrito || ''
+      });
 
       alert('Perfil actualizado correctamente');
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al actualizar el perfil');
+      alert('Error al actualizar el perfil: ' + error.message);
     }
   };
 

@@ -222,10 +222,10 @@ app.put('/api/ciudadanos/:id', async (req, res) => {
     const { nombre_completo, telefono, direccion, ciudad, distrito } = req.body;
 
     const result = await pool.query(
-      `UPDATE ciudadanos 
+      `UPDATE ciudadanos
        SET nombre_completo = $1, telefono = $2, direccion = $3, ciudad = $4, distrito = $5, updated_at = NOW()
        WHERE id = $6
-       RETURNING *`,
+       RETURNING id, nombre_completo, email, telefono, direccion, ciudad, distrito, fecha_registro, verificado`,
       [nombre_completo, telefono, direccion, ciudad, distrito, id]
     );
 
@@ -236,7 +236,7 @@ app.put('/api/ciudadanos/:id', async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error('Error updating profile:', err);
-    res.status(500).json({ error: 'Error al actualizar perfil' });
+    res.status(500).json({ error: 'Error al actualizar perfil', details: err.message });
   }
 });
 
