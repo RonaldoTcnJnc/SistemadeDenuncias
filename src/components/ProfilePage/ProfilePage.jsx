@@ -1,25 +1,53 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './ProfilePage.css';
-// Importa la imagen de perfil por defecto (coloca Miperfil.png en src/assets/)
 import profileDefault from '../../assets/MiPerfil.png';
 
-// Componente: Página de Perfil — mantén la lógica de subida y validación
 const ProfilePage = () => {
-  // Estado para mostrar la imagen actual del usuario (URL base64 o import)
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [profileImage, setProfileImage] = useState(profileDefault);
+  const [formData, setFormData] = useState({
+    nombre_completo: '',
+    email: '',
+    telefono: '',
+    direccion: '',
+    ciudad: '',
+    distrito: ''
+  });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
   const fileInputRef = useRef(null);
 
-  // Al hacer click en el lápiz: abrir selector de archivos
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const userData = JSON.parse(userStr);
+      setUser(userData);
+      setFormData({
+        nombre_completo: userData.nombre_completo || '',
+        email: userData.email || '',
+        telefono: userData.telefono || '',
+        direccion: userData.direccion || '',
+        ciudad: userData.ciudad || '',
+        distrito: userData.distrito || ''
+      });
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
   const handleEditPicClick = () => {
     fileInputRef.current?.click();
   };
 
-  // Validación y lectura del archivo seleccionado
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Tipos permitidos: PNG, JPG, JPEG, WebP (si usas webp en el sitio)
     const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
     const maxSize = 5 * 1024 * 1024; // 5 MB
 
@@ -33,27 +61,97 @@ const ProfilePage = () => {
       return;
     }
 
-    // Mostrar vista previa local (URL base64)
     const reader = new FileReader();
     reader.onload = (e) => {
       setProfileImage(e.target?.result);
     };
     reader.readAsDataURL(file);
-
-
   };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(`/api/ciudadanos/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      if (!response.ok) throw new Error('Error al actualizar perfil');
+
+      // Actualizar localStorage
+      const updatedUser = { ...user, ...formData };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+
+      alert('Perfil actualizado correctamente');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al actualizar el perfil');
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert('Las contraseñas no coinciden');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      alert('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/ciudadanos/${user.id}/password`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        })
+      });
+
+      if (!response.ok) throw new Error('Error al cambiar contraseña');
+
+      alert('Contraseña cambiada correctamente');
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al cambiar la contraseña. Verifica tu contraseña actual.');
+    }
+  };
+
+  if (loading) {
+    return <div className="profile-page-wrapper"><p>Cargando perfil...</p></div>;
+  }
+
+  if (!user) {
+    return <div className="profile-page-wrapper"><p>Debes iniciar sesión para ver tu perfil</p></div>;
+  }
 
   return (
     <div className="profile-page-wrapper">
-      {/* Header con título y avatar al lado */}
+      {/* Header */}
       <div className="profile-header card">
         <div className="profile-header-left">
-          {/* Título y subtítulo */}
           <h1 className="profile-title">Mi Perfil</h1>
           <p className="profile-subtitle">Gestiona tu información y preferencias</p>
         </div>
 
-        {/* Avatar visible al lado del título con botón para editar (mantener funcionalidad) */}
         <div className="profile-header-right">
           <div className="avatar-wrapper">
             <img src={profileImage} alt="Foto de perfil" className="avatar-img" />
@@ -71,102 +169,128 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {/* Card: Información personal con diseño más profesional */}
+      {/* Información personal */}
       <div className="card">
         <h3>Información Personal</h3>
-        <div className="personal-info-form">
+        <form className="personal-info-form" onSubmit={handleSaveProfile}>
           <div className="info-fields">
             <div className="form-group">
               <label>Nombre Completo</label>
-              <input type="text" defaultValue="Juan Pérez García" />
+              <input
+                type="text"
+                name="nombre_completo"
+                value={formData.nombre_completo}
+                onChange={handleInputChange}
+              />
             </div>
             <div className="form-group">
               <label>Correo Electrónico</label>
-              <input type="email" defaultValue="juan.perez@example.com" readOnly />
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                readOnly
+              />
+            </div>
+            <div className="form-group">
+              <label>Teléfono</label>
+              <input
+                type="tel"
+                name="telefono"
+                value={formData.telefono}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="form-group">
+              <label>Dirección</label>
+              <input
+                type="text"
+                name="direccion"
+                value={formData.direccion}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="form-group">
+              <label>Ciudad</label>
+              <input
+                type="text"
+                name="ciudad"
+                value={formData.ciudad}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="form-group">
+              <label>Distrito</label>
+              <input
+                type="text"
+                name="distrito"
+                value={formData.distrito}
+                onChange={handleInputChange}
+              />
             </div>
             <div className="form-actions-row">
-              <button className="btn btn-primary">Guardar cambios</button>
+              <button type="submit" className="btn btn-primary">Guardar cambios</button>
             </div>
           </div>
-        </div>
+        </form>
       </div>
 
-      {/* Card: Cambiar contraseña */}
+      {/* Cambiar contraseña */}
       <div className="card">
         <h3>Cambiar Contraseña</h3>
-        <div className="password-form">
+        <form className="password-form" onSubmit={handleChangePassword}>
           <div className="form-group">
             <label>Contraseña actual</label>
-            <input type="password" />
+            <input
+              type="password"
+              name="currentPassword"
+              value={passwordData.currentPassword}
+              onChange={handlePasswordChange}
+            />
           </div>
-          <div className="form-group-inline">
-            <div className="form-group">
-              <label>Nueva contraseña</label>
-              <input type="password" />
-            </div>
-            <div className="form-group">
-              <label>Confirmar nueva contraseña</label>
-              <input type="password" />
-            </div>
+          <div className="form-group">
+            <label>Nueva contraseña</label>
+            <input
+              type="password"
+              name="newPassword"
+              value={passwordData.newPassword}
+              onChange={handlePasswordChange}
+            />
+          </div>
+          <div className="form-group">
+            <label>Confirmar nueva contraseña</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={passwordData.confirmPassword}
+              onChange={handlePasswordChange}
+            />
           </div>
           <div className="form-actions-row">
-            <button className="btn btn-primary">Actualizar contraseña</button>
+            <button type="submit" className="btn btn-primary">Actualizar contraseña</button>
           </div>
-        </div>
+        </form>
       </div>
 
-      {/* Card: Preferencias con switches estilizados */}
+      {/* Preferencias de notificaciones */}
       <div className="card">
-        <h3>Preferencias de Notificación</h3>
-        <div className="notification-prefs">
-          <div className="pref-item">
-            <div>
-              <strong>Notificaciones por correo</strong>
-              <p>Recibe un email cuando el estado de tu denuncia cambie.</p>
-            </div>
-            <label className="switch">
-              <input type="checkbox" defaultChecked />
-              <span className="slider round"></span>
-            </label>
-          </div>
-
-          <div className="pref-item">
-            <div>
-              <strong>Notificaciones push</strong>
-              <p>Recibe notificaciones en tu navegador sobre tus denuncias.</p>
-            </div>
-            <label className="switch">
-              <input type="checkbox" />
-              <span className="slider round"></span>
-            </label>
-          </div>
-
-          <div className="pref-item">
-            <div>
-              <strong>Boletín informativo</strong>
-              <p>Recibe noticias y actualizaciones de la plataforma.</p>
-            </div>
-            <label className="switch">
-              <input type="checkbox" defaultChecked />
-              <span className="slider round"></span>
-            </label>
-          </div>
-          <div className="form-actions-row">
-            <button className="btn btn-primary">Guardar preferencias</button>
-          </div>
+        <h3>Preferencias de Notificaciones</h3>
+        <div className="preferences-list">
+          <label className="pref-item">
+            <input type="checkbox" defaultChecked />
+            <span>Notificaciones por correo electrónico</span>
+          </label>
+          <label className="pref-item">
+            <input type="checkbox" />
+            <span>Notificaciones push en el navegador</span>
+          </label>
+          <label className="pref-item">
+            <input type="checkbox" defaultChecked />
+            <span>Recibir boletín informativo</span>
+          </label>
         </div>
-      </div>
-
-      {/* Zona de peligro: eliminar cuenta */}
-      <div className="card danger-zone">
-        <h3>Zona de Peligro</h3>
-        <div className="danger-content">
-          <p>Estas acciones son permanentes y no se pueden deshacer.</p>
-          <div>
-            <strong>Eliminar mi cuenta</strong>
-            <p>Se borrarán todas tus denuncias y datos personales.</p>
-          </div>
-          <button className="btn btn-danger">Eliminar cuenta</button>
+        <div className="form-actions-row">
+          <button className="btn btn-secondary">Guardar preferencias</button>
         </div>
       </div>
     </div>
