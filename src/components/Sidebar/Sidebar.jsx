@@ -1,12 +1,13 @@
+```javascript
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import './Sidebar.css';
 // Íconos
-import { FiGrid, FiPlusCircle, FiFileText, FiUser, FiLogOut } from 'react-icons/fi';
+import { FiHome, FiFileText, FiUser, FiLogOut, FiPlusCircle } from 'react-icons/fi';
 // Imagen (coloca MisDenuncias.png en src/assets/)
-import misDenunciasImg from '../../assets/MisDenuncias.png';
+import SidebarImage from '../../assets/SidebarImage.png';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -21,21 +22,21 @@ const Sidebar = () => {
     };
 
     return (
-        <aside className="sidebar-container">
-            <div className="sidebar-header">
+        <div className={`sidebar - container ${ isOpen ? 'open' : '' } `}>
+            <h2 className="sidebar-header">
                 Plataforma <br/> Ciudadana
-            </div>
+            </h2>
             <nav className="sidebar-nav">
-                <NavLink to="/panel" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+                <NavLink to="/panel" className={({ isActive }) => `sidebar - link ${ isActive ? 'active' : '' } `} onClick={onClose}>
                     <FiGrid /> Panel del Ciudadano
                 </NavLink>
-                <NavLink to="/nueva-denuncia" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+                <NavLink to="/nueva-denuncia" className={({ isActive }) => `sidebar - link ${ isActive ? 'active' : '' } `} onClick={onClose}>
                     <FiPlusCircle /> Nueva denuncia
                 </NavLink>
-                <NavLink to="/mis-denuncias" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+                <NavLink to="/mis-denuncias" className={({ isActive }) => `sidebar - link ${ isActive ? 'active' : '' } `} onClick={onClose}>
                     <FiFileText /> Mis denuncias
                 </NavLink>
-                <NavLink to="/perfil" className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}>
+                <NavLink to="/perfil" className={({ isActive }) => `sidebar - link ${ isActive ? 'active' : '' } `} onClick={onClose}>
                     <FiUser /> Perfil
                 </NavLink>
             </nav>
