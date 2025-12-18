@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS ciudadanos (
     ciudad VARCHAR(100),
     distrito VARCHAR(100),
     fotografia_perfil BYTEA,
-    contraseÃ±a_hash VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ultimo_login TIMESTAMP,
     activo BOOLEAN DEFAULT TRUE,
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS autoridades (
     cargo VARCHAR(100),
     distrito_asignado VARCHAR(100),
     fotografia_perfil BYTEA,
-    contraseÃ±a_hash VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     fecha_ingreso TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ultimo_login TIMESTAMP,
     activo BOOLEAN DEFAULT TRUE,
@@ -417,7 +417,7 @@ FLUJO DE UNA DENUNCIA:
 -- INSERTAR CIUDADANOS DE EJEMPLO
 -- ============================================================================
 
-INSERT INTO ciudadanos (nombre_completo, email, telefono, direccion, ciudad, distrito, contraseÃ±a_hash, fecha_registro, verificado, notificaciones_email, notificaciones_push, boletin_informativo) 
+INSERT INTO ciudadanos (nombre_completo, email, telefono, direccion, ciudad, distrito, password_hash, fecha_registro, verificado, notificaciones_email, notificaciones_push, boletin_informativo) 
 VALUES 
 ('Juan PÃ©rez GarcÃ­a', 'juan.perez@example.com', '+51 987 654 321', 'Calle Principal 123', 'Cusco', 'Norte', 'hashed_password_123', NOW() - INTERVAL '6 months', TRUE, TRUE, FALSE, TRUE),
 ('MarÃ­a LÃ³pez RodrÃ­guez', 'maria.lopez@example.com', '+51 987 654 322', 'Avenida Central 456', 'Cusco', 'Sur', 'hashed_password_124', NOW() - INTERVAL '4 months', TRUE, TRUE, TRUE, TRUE),
@@ -429,7 +429,7 @@ VALUES
 -- INSERTAR AUTORIDADES DE EJEMPLO
 -- ============================================================================
 
-INSERT INTO autoridades (nombre_completo, email, telefono, numero_empleado, departamento, cargo, distrito_asignado, contraseÃ±a_hash, fecha_ingreso, verificado, activo, rol, nivel_permiso) 
+INSERT INTO autoridades (nombre_completo, email, telefono, numero_empleado, departamento, cargo, distrito_asignado, password_hash, fecha_ingreso, verificado, activo, rol, nivel_permiso) 
 VALUES 
 ('LucÃ­a MÃ©ndez LÃ³pez', 'lucia.mendez@municipio.gov', '+51 991 234 567', 'AUT001', 'AlcaldÃ­a', 'DIAT', 'Norte', 'hashed_password_auth_001', NOW() - INTERVAL '3 years', TRUE, TRUE, 'Administrador', 3),
 ('Carlos RamÃ­rez Ruiz', 'carlos.ramirez@municipio.gov', '+51 991 234 568', 'AUT002', 'Infraestructura', 'Supervisor de Vialidad', 'Norte', 'hashed_password_auth_002', NOW() - INTERVAL '2 years', TRUE, TRUE, 'Supervisor', 2),
