@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import './ProfilePage.css';
 // Importa la imagen de perfil por defecto (coloca Miperfil.png en src/assets/)
-import profileDefault from '../../assets/Miperfil.png';
+import profileDefault from '../../assets/MiPerfil.png';
 
 // Componente: Página de Perfil — mantén la lógica de subida y validación
 const ProfilePage = () => {
@@ -40,7 +40,7 @@ const ProfilePage = () => {
     };
     reader.readAsDataURL(file);
 
-    
+
   };
 
   return (
