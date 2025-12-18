@@ -11,6 +11,7 @@ import Usuarios from './components/Authority/Usuarios';
 import PerfilAuthority from './components/Authority/PerfilAuthority';
 import ConfiguracionAuthority from './components/Authority/ConfiguracionAuthority';
 import AuthorityKnowledge from './components/Authority/AuthorityKnowledge';
+import AuthorityLayout from './components/Authority/AuthorityLayout';
 import CitizenDashboard from './components/CitizenDashboard/CitizenDashboard';
 import ProfilePage from './components/ProfilePage/ProfilePage';
 import DashboardLayout from './components/DashboardLayout/DashboardLayout';
@@ -39,13 +40,71 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/iniciar-sesion" element={<LoginPage />} />
         <Route path="/iniciar-sesion-autoridad" element={<AuthorityLogin />} />
-        <Route path="/panel-autoridad" element={<AuthorityDashboard />} />
-        <Route path="/denuncias" element={<Denuncias />} />
-        <Route path="/estadisticas" element={<Estadisticas />} />
-        <Route path="/usuarios" element={<Usuarios />} />
-        <Route path="/perfil-autoridad" element={<PerfilAuthority />} />
-        <Route path="/configuracion-autoridad" element={<ConfiguracionAuthority />} />
-        <Route path="/base-conocimientos" element={<AuthorityKnowledge />} />
+
+        {/* Rutas de Autoridad con AuthorityLayout */}
+        <Route path="/panel-autoridad" element={
+          isAuthenticated ? (
+            <AuthorityLayout>
+              <AuthorityDashboard />
+            </AuthorityLayout>
+          ) : (
+            <Navigate to="/iniciar-sesion-autoridad" />
+          )
+        } />
+        <Route path="/denuncias" element={
+          isAuthenticated ? (
+            <AuthorityLayout>
+              <Denuncias />
+            </AuthorityLayout>
+          ) : (
+            <Navigate to="/iniciar-sesion-autoridad" />
+          )
+        } />
+        <Route path="/estadisticas" element={
+          isAuthenticated ? (
+            <AuthorityLayout>
+              <Estadisticas />
+            </AuthorityLayout>
+          ) : (
+            <Navigate to="/iniciar-sesion-autoridad" />
+          )
+        } />
+        <Route path="/usuarios" element={
+          isAuthenticated ? (
+            <AuthorityLayout>
+              <Usuarios />
+            </AuthorityLayout>
+          ) : (
+            <Navigate to="/iniciar-sesion-autoridad" />
+          )
+        } />
+        <Route path="/perfil-autoridad" element={
+          isAuthenticated ? (
+            <AuthorityLayout>
+              <PerfilAuthority />
+            </AuthorityLayout>
+          ) : (
+            <Navigate to="/iniciar-sesion-autoridad" />
+          )
+        } />
+        <Route path="/configuracion-autoridad" element={
+          isAuthenticated ? (
+            <AuthorityLayout>
+              <ConfiguracionAuthority />
+            </AuthorityLayout>
+          ) : (
+            <Navigate to="/iniciar-sesion-autoridad" />
+          )
+        } />
+        <Route path="/base-conocimientos" element={
+          isAuthenticated ? (
+            <AuthorityLayout>
+              <AuthorityKnowledge />
+            </AuthorityLayout>
+          ) : (
+            <Navigate to="/iniciar-sesion-autoridad" />
+          )
+        } />
 
         {/* Rutas Protegidas con el Layout del Dashboard */}
         <Route
