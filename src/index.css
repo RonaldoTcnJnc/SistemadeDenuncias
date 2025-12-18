@@ -24,3 +24,69 @@ body {
 * {
   box-sizing: border-box;
 }
+
+/* Responsive utilities */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Mobile-first responsive breakpoints */
+@media (max-width: 768px) {
+  /* Tables scroll horizontally on mobile */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  /* Stack flex containers on mobile */
+  .flex-row {
+    flex-direction: column !important;
+  }
+  
+  /* Full width cards on mobile */
+  .card, .kpi-card, .chart-card {
+    width: 100% !important;
+    margin-bottom: 16px;
+  }
+  
+  /* Smaller text on mobile */
+  h1 {
+    font-size: 24px !important;
+  }
+  
+  h2 {
+    font-size: 20px !important;
+  }
+  
+  h3 {
+    font-size: 18px !important;
+  }
+  
+  /* Hide less important columns on mobile */
+  .hide-mobile {
+    display: none !important;
+  }
+  
+  /* Adjust padding for mobile */
+  .authority-dashboard-container,
+  .myreports-page,
+  .login-page-container {
+    padding: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Even smaller adjustments for very small screens */
+  body {
+    font-size: 14px;
+  }
+  
+  button {
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+  }
+}
