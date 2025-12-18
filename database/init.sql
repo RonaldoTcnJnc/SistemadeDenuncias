@@ -4,6 +4,31 @@
 -- ============================================================================
 
 -- ============================================================================
+-- PARTE 0: LIMPIEZA (DROP TABLES)
+-- ============================================================================
+DROP TABLE IF EXISTS calificaciones_denuncia CASCADE;
+DROP TABLE IF EXISTS notificaciones_ciudadano CASCADE;
+DROP TABLE IF EXISTS comentarios_denuncia CASCADE;
+DROP TABLE IF EXISTS historial_estado_denuncia CASCADE;
+DROP TABLE IF EXISTS actualizaciones_denuncia CASCADE;
+DROP TABLE IF EXISTS tareas_equipo CASCADE;
+DROP TABLE IF EXISTS miembros_equipo CASCADE;
+DROP TABLE IF EXISTS equipos_municipales CASCADE;
+DROP TABLE IF EXISTS actualizaciones_autoridad CASCADE;
+DROP TABLE IF EXISTS asignacion_denuncia CASCADE;
+DROP TABLE IF EXISTS autoridades CASCADE;
+DROP TABLE IF EXISTS denuncias CASCADE;
+DROP TABLE IF EXISTS ciudadanos CASCADE;
+DROP TABLE IF EXISTS estadisticas_diarias CASCADE;
+DROP TABLE IF EXISTS reporte_categoria CASCADE;
+DROP TABLE IF EXISTS reporte_distrito CASCADE;
+DROP TABLE IF EXISTS rendimiento_autoridad CASCADE;
+DROP TABLE IF EXISTS configuracion_sistema CASCADE;
+DROP TABLE IF EXISTS registro_actividades CASCADE;
+DROP TABLE IF EXISTS notificaciones_sistema CASCADE;
+DROP TABLE IF EXISTS plantillas_respuesta CASCADE;
+
+-- ============================================================================
 -- PARTE 1: TABLAS DE USUARIOS CIUDADANOS
 -- ============================================================================
 

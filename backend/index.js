@@ -153,8 +153,8 @@ app.get('/api/auth/reset-passwords-dev', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash('123456', salt);
 
-    await pool.query('UPDATE ciudadanos SET "contraseña_hash" = $1', [hash]);
-    await pool.query('UPDATE autoridades SET "contraseña_hash" = $1', [hash]);
+    await pool.query('UPDATE ciudadanos SET "password_hash" = $1', [hash]);
+    await pool.query('UPDATE autoridades SET "password_hash" = $1', [hash]);
 
     res.json({ success: true, message: 'Todas las contraseñas actualizadas a "123456"' });
   } catch (err) {
@@ -185,7 +185,7 @@ app.post('/api/auth/login', async (req, res) => {
     // Verificar password
     // Nota: en init.sql las contraseñas eran texto plano "hashed_password_...".
     // El script /api/auth/reset-passwords-dev las convertirá a hashes reales.
-    const validPassword = await bcrypt.compare(password, user.contraseña_hash);
+    const validPassword = await bcrypt.compare(password, user.password_hash);
 
     if (!validPassword) {
       return res.status(401).json({ error: 'Contraseña incorrecta' });
