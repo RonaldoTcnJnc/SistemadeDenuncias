@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import AuthorityLayout from './AuthorityLayout';
 import './Estadisticas.css';
 import { FiTrendingUp, FiCheckCircle, FiClock, FiAlertCircle, FiUsers, FiBarChart2, FiDownload } from 'react-icons/fi';
 
@@ -233,140 +232,136 @@ const Estadisticas = () => {
 
   if (loading) {
     return (
-      <AuthorityLayout>
-        <div className="authority-dashboard-container">
-          <p>Cargando estadísticas...</p>
-        </div>
-      </AuthorityLayout>
+      <div className="authority-dashboard-container">
+        <p>Cargando estadísticas...</p>
+      </div>
     );
   }
 
   return (
-    <AuthorityLayout>
-      <div className="authority-dashboard-container">
-        {/* Header */}
-        <div className="stats-header">
-          <div>
-            <h1>Informes y Análisis</h1>
-            <p className="subtitle">Visualiza tendencias y datos del sistema.</p>
-          </div>
-          <button className="btn-export" title="Descargar reporte">
-            <FiDownload size={20} /> Descargar Reporte
-          </button>
+    <div className="authority-dashboard-container">
+      {/* Header */}
+      <div className="stats-header">
+        <div>
+          <h1>Informes y Análisis</h1>
+          <p className="subtitle">Visualiza tendencias y datos del sistema.</p>
         </div>
+        <button className="btn-export" title="Descargar reporte">
+          <FiDownload size={20} /> Descargar Reporte
+        </button>
+      </div>
 
-        {/* KPIs principales */}
-        <div className="kpis-grid">
-          <div className="kpi-card kpi-primary">
-            <div className="kpi-icon"><FiBarChart2 size={24} /></div>
-            <div className="kpi-content">
-              <div className="kpi-label">Total de Denuncias</div>
-              <div className="kpi-value">{datosResumen.totalDenuncias}</div>
-              <div className="kpi-trend">Registradas en el sistema</div>
-            </div>
-          </div>
-
-          <div className="kpi-card kpi-success">
-            <div className="kpi-icon"><FiCheckCircle size={24} /></div>
-            <div className="kpi-content">
-              <div className="kpi-label">Denuncias Resueltas</div>
-              <div className="kpi-value">{datosResumen.resueltas}</div>
-              <div className="kpi-trend">{datosResumen.tasaResolucion}% de resolución</div>
-            </div>
-          </div>
-
-          <div className="kpi-card kpi-warning">
-            <div className="kpi-icon"><FiClock size={24} /></div>
-            <div className="kpi-content">
-              <div className="kpi-label">En Progreso</div>
-              <div className="kpi-value">{datosResumen.enProgreso}</div>
-              <div className="kpi-trend">Siendo atendidas</div>
-            </div>
-          </div>
-
-          <div className="kpi-card kpi-alert">
-            <div className="kpi-icon"><FiAlertCircle size={24} /></div>
-            <div className="kpi-content">
-              <div className="kpi-label">Pendientes</div>
-              <div className="kpi-value">{datosResumen.pendientes}</div>
-              <div className="kpi-trend">En cola de atención</div>
-            </div>
+      {/* KPIs principales */}
+      <div className="kpis-grid">
+        <div className="kpi-card kpi-primary">
+          <div className="kpi-icon"><FiBarChart2 size={24} /></div>
+          <div className="kpi-content">
+            <div className="kpi-label">Total de Denuncias</div>
+            <div className="kpi-value">{datosResumen.totalDenuncias}</div>
+            <div className="kpi-trend">Registradas en el sistema</div>
           </div>
         </div>
 
-        {/* Filtros */}
-        <div className="filters-section">
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} className="filter-select">
-              <option value="todos">Todas las categorías</option>
-              <option value="Vialidad">Vialidad</option>
-              <option value="Alumbrado Público">Alumbrado Público</option>
-              <option value="Basura">Basura</option>
-              <option value="Grafiti">Grafiti</option>
-              <option value="Señales">Señales</option>
-              <option value="Otros">Otros</option>
-            </select>
+        <div className="kpi-card kpi-success">
+          <div className="kpi-icon"><FiCheckCircle size={24} /></div>
+          <div className="kpi-content">
+            <div className="kpi-label">Denuncias Resueltas</div>
+            <div className="kpi-value">{datosResumen.resueltas}</div>
+            <div className="kpi-trend">{datosResumen.tasaResolucion}% de resolución</div>
           </div>
         </div>
 
-        {/* Gráficos principales */}
-        <div className="charts-row">
-          <div className="chart-card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3>Tendencias de Denuncias por Mes</h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ width: 12, height: 12, borderRadius: 6, background: chartColor }}></div>
-                <div style={{ fontSize: 13, color: '#374151' }}>{filtroCategoria && filtroCategoria !== 'todos' ? `${filtroCategoria} (mensual)` : 'Total denuncias (mensual)'}</div>
-              </div>
-            </div>
-            <ChartLine data={datosPorMes} labels={meses} color={chartColor} />
-          </div>
-          <div className="chart-card">
-            <h3>Estado General de Denuncias</h3>
-            <div className="chart-pie-container">
-              <ChartPie items={estadoPorCategoria} size={260} />
-              <div className="chart-legend">
-                {estadoPorCategoria.map((item, idx) => (
-                  <div key={idx} className="legend-item">
-                    <span className="legend-color" style={{ backgroundColor: item.color }}></span>
-                    <span className="legend-text">{item.name}: {item.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+        <div className="kpi-card kpi-warning">
+          <div className="kpi-icon"><FiClock size={24} /></div>
+          <div className="kpi-content">
+            <div className="kpi-label">En Progreso</div>
+            <div className="kpi-value">{datosResumen.enProgreso}</div>
+            <div className="kpi-trend">Siendo atendidas</div>
           </div>
         </div>
 
-        {/* Categorías */}
-        <div className="charts-row">
-          <div className="chart-card">
-            <h3>Denuncias por Categoría</h3>
-            <ChartBars items={denunciasPorCategoria} />
+        <div className="kpi-card kpi-alert">
+          <div className="kpi-icon"><FiAlertCircle size={24} /></div>
+          <div className="kpi-content">
+            <div className="kpi-label">Pendientes</div>
+            <div className="kpi-value">{datosResumen.pendientes}</div>
+            <div className="kpi-trend">En cola de atención</div>
           </div>
         </div>
+      </div>
 
-        {/* Resumen estadístico */}
-        <div className="summary-section">
-          <h3>Resumen Estadístico</h3>
-          <div className="summary-grid">
-            <div className="summary-item">
-              <div className="summary-title">Tasa de Resolución</div>
-              <div className="summary-bar">
-                <div className="progress-bar" style={{ width: `${datosResumen.tasaResolucion}%` }}></div>
-              </div>
-              <div className="summary-value">{datosResumen.tasaResolucion}%</div>
+      {/* Filtros */}
+      <div className="filters-section">
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} className="filter-select">
+            <option value="todos">Todas las categorías</option>
+            <option value="Vialidad">Vialidad</option>
+            <option value="Alumbrado Público">Alumbrado Público</option>
+            <option value="Basura">Basura</option>
+            <option value="Grafiti">Grafiti</option>
+            <option value="Señales">Señales</option>
+            <option value="Otros">Otros</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Gráficos principales */}
+      <div className="charts-row">
+        <div className="chart-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3>Tendencias de Denuncias por Mes</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 12, height: 12, borderRadius: 6, background: chartColor }}></div>
+              <div style={{ fontSize: 13, color: '#374151' }}>{filtroCategoria && filtroCategoria !== 'todos' ? `${filtroCategoria} (mensual)` : 'Total denuncias (mensual)'}</div>
             </div>
-            <div className="summary-item">
-              <div className="summary-title">Denuncias Completadas</div>
-              <div className="summary-bar">
-                <div className="progress-bar" style={{ width: `${datosResumen.totalDenuncias > 0 ? (datosResumen.resueltas / datosResumen.totalDenuncias) * 100 : 0}%`, backgroundColor: '#22c55e' }}></div>
-              </div>
-              <div className="summary-value">{datosResumen.resueltas}/{datosResumen.totalDenuncias}</div>
+          </div>
+          <ChartLine data={datosPorMes} labels={meses} color={chartColor} />
+        </div>
+        <div className="chart-card">
+          <h3>Estado General de Denuncias</h3>
+          <div className="chart-pie-container">
+            <ChartPie items={estadoPorCategoria} size={260} />
+            <div className="chart-legend">
+              {estadoPorCategoria.map((item, idx) => (
+                <div key={idx} className="legend-item">
+                  <span className="legend-color" style={{ backgroundColor: item.color }}></span>
+                  <span className="legend-text">{item.name}: {item.value}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
-    </AuthorityLayout>
+
+      {/* Categorías */}
+      <div className="charts-row">
+        <div className="chart-card">
+          <h3>Denuncias por Categoría</h3>
+          <ChartBars items={denunciasPorCategoria} />
+        </div>
+      </div>
+
+      {/* Resumen estadístico */}
+      <div className="summary-section">
+        <h3>Resumen Estadístico</h3>
+        <div className="summary-grid">
+          <div className="summary-item">
+            <div className="summary-title">Tasa de Resolución</div>
+            <div className="summary-bar">
+              <div className="progress-bar" style={{ width: `${datosResumen.tasaResolucion}%` }}></div>
+            </div>
+            <div className="summary-value">{datosResumen.tasaResolucion}%</div>
+          </div>
+          <div className="summary-item">
+            <div className="summary-title">Denuncias Completadas</div>
+            <div className="summary-bar">
+              <div className="progress-bar" style={{ width: `${datosResumen.totalDenuncias > 0 ? (datosResumen.resueltas / datosResumen.totalDenuncias) * 100 : 0}%`, backgroundColor: '#22c55e' }}></div>
+            </div>
+            <div className="summary-value">{datosResumen.resueltas}/{datosResumen.totalDenuncias}</div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
