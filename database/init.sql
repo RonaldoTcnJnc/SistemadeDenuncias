@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS actualizaciones_denuncia (
     descripcion TEXT,
     autor VARCHAR(255), -- puede ser ciudadano o autoridad
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    visible_para_ciudadano BOOLEAN DEFAULT TRUE
+    visible_publicamente BOOLEAN DEFAULT TRUE
 );
 
 -- Tabla de historial de estados de denuncias
