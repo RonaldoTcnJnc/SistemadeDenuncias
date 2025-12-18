@@ -215,6 +215,88 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// PUT /api/ciudadanos/:id - Actualizar perfil de ciudadano
+app.put('/api/ciudadanos/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre_completo, telefono, direccion, ciudad, distrito } = req.body;
+
+    const result = await pool.query(
+      `UPDATE ciudadanos 
+       SET nombre_completo = $1, telefono = $2, direccion = $3, ciudad = $4, distrito = $5, updated_at = NOW()
+       WHERE id = $6
+       RETURNING *`,
+      [nombre_completo, telefono, direccion, ciudad, distrito, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error updating profile:', err);
+    res.status(500).json({ error: 'Error al actualizar perfil' });
+  }
+});
+
+// PUT /api/ciudadanos/:id/password - Cambiar contraseña
+app.put('/api/ciudadanos/:id/password', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { currentPassword, newPassword } = req.body;
+
+    const userResult = await pool.query('SELECT password_hash FROM ciudadanos WHERE id = $1', [id]);
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    const isValid = await bcrypt.compare(currentPassword, userResult.rows[0].password_hash);
+
+    if (!isValid) {
+      return res.status(401).json({ error: 'Contraseña actual incorrecta' });
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+
+    await pool.query(
+      'UPDATE ciudadanos SET password_hash = $1, updated_at = NOW() WHERE id = $2',
+      [newHash, id]
+    );
+
+    res.json({ success: true, message: 'Contraseña actualizada correctamente' });
+  } catch (err) {
+    console.error('Error changing password:', err);
+    res.status(500).json({ error: 'Error al cambiar contraseña' });
+  }
+});
+
+// PUT /api/denuncias/:id - Actualizar estado de denuncia
+app.put('/api/denuncias/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { estado, prioridad } = req.body;
+
+    const result = await pool.query(
+      `UPDATE denuncias 
+       SET estado = $1, prioridad = $2
+       WHERE id = $3
+       RETURNING *`,
+      [estado, prioridad, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Denuncia no encontrada' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error updating denuncia:', err);
+    res.status(500).json({ error: 'Error al actualizar denuncia' });
+  }
+});
+
 // ----------------------
 
 app.listen(PORT, () => console.log(`Backend escuchando en http://localhost:${PORT}`));
