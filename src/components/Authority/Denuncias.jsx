@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import AuthorityLayout from './AuthorityLayout';
 import './Denuncias.css';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
@@ -18,9 +18,9 @@ const createMarkerIcon = (estado) => {
     'Pendiente': '#ef4444',     // Rojo
     'En Progreso': '#eab308'    // Amarillo
   };
-  
+
   const color = colorMap[estado] || '#3b82f6';
-  
+
   return L.divIcon({
     html: `<div style="
       background-color: ${color};
@@ -41,37 +41,47 @@ const createMarkerIcon = (estado) => {
   });
 };
 
-const sample = [
-  { id: '#12345', problema: 'Bache', ubicacion: 'Calle Principal', estado: 'Resuelta', fecha: '2024-01-15', distrito: 'Norte', lat: -13.5280, lng: -71.9850 },
-  { id: '#12346', problema: 'Farola Rota', ubicacion: 'Avenida del Roble', estado: 'Pendiente', fecha: '2024-01-16', distrito: 'Sur', lat: -13.5350, lng: -71.9920 },
-  { id: '#12347', problema: 'Grafiti', ubicacion: 'Calle del Olmo', estado: 'En Progreso', fecha: '2024-01-17', distrito: 'Norte', lat: -13.5240, lng: -71.9780 },
-  { id: '#12348', problema: 'Inundación', ubicacion: 'Camino del Rio', estado: 'Resuelta', fecha: '2024-01-18', distrito: 'Este', lat: -13.5320, lng: -71.9710 },
-  { id: '#12349', problema: 'Señal Dañada', ubicacion: 'Paso del Parque', estado: 'Pendiente', fecha: '2024-01-19', distrito: 'Oeste', lat: -13.5316, lng: -71.9910 },
-  { id: '#12350', problema: 'Vertido', ubicacion: 'Río Seco', estado: 'Pendiente', fecha: '2024-01-20', distrito: 'Norte', lat: -13.5235, lng: -71.9780 },
-  { id: '#12351', problema: 'Alcantarilla tapada', ubicacion: 'Plaza Central', estado: 'En Progreso', fecha: '2024-01-21', distrito: 'Sur', lat: -13.5352, lng: -71.9890 },
-];
-
 const Denuncias = () => {
+  const [denuncias, setDenuncias] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [estado, setEstado] = useState('Todos');
   const [distrito, setDistrito] = useState('Todos');
 
-  const estados = ['Todos', 'Resuelta', 'Pendiente', 'En Progreso'];
-  const distritos = useMemo(() => ['Todos', ...Array.from(new Set(sample.map(s => s.distrito)))], []);
+  useEffect(() => {
+    const fetchDenuncias = async () => {
+      try {
+        const response = await fetch('/api/denuncias');
+        if (!response.ok) throw new Error('Error al cargar denuncias');
 
-  const filtered = sample.filter(s => {
-    if (estado !== 'Todos' && s.estado !== estado) return false;
-    if (distrito !== 'Todos' && s.distrito !== distrito) return false;
-    if (query && !(`${s.problema} ${s.ubicacion} ${s.id}`.toLowerCase().includes(query.toLowerCase()))) return false;
+        const data = await response.json();
+        setDenuncias(data);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching denuncias:', err);
+        setLoading(false);
+      }
+    };
+
+    fetchDenuncias();
+  }, []);
+
+  const estados = ['Todos', 'Resuelta', 'Pendiente', 'En Progreso'];
+  const distritos = useMemo(() => ['Todos', ...Array.from(new Set(denuncias.map(d => d.distrito).filter(Boolean)))], [denuncias]);
+
+  const filtered = denuncias.filter(d => {
+    if (estado !== 'Todos' && d.estado !== estado) return false;
+    if (distrito !== 'Todos' && d.distrito !== distrito) return false;
+    if (query && !(`${d.titulo} ${d.ubicacion} ${d.id}`.toLowerCase().includes(query.toLowerCase()))) return false;
     return true;
   });
 
   const totals = useMemo(() => {
-    const total = sample.length;
-    const resueltas = sample.filter(s => s.estado === 'Resuelta').length;
-    const pendientes = sample.filter(s => s.estado === 'Pendiente').length;
+    const total = denuncias.length;
+    const resueltas = denuncias.filter(d => d.estado === 'Resuelta').length;
+    const pendientes = denuncias.filter(d => d.estado === 'Pendiente').length;
     return { total, resueltas, pendientes };
-  }, []);
+  }, [denuncias]);
 
   const getMarkerColor = (estado) => {
     switch (estado) {
@@ -89,35 +99,35 @@ const Denuncias = () => {
   // Mapa interactivo con Leaflet
   const MapComponent = () => {
     return (
-      <MapContainer 
-        center={[CUSCO_CENTER.lat, CUSCO_CENTER.lng]} 
-        zoom={13} 
+      <MapContainer
+        center={[CUSCO_CENTER.lat, CUSCO_CENTER.lng]}
+        zoom={13}
         style={{ width: '100%', height: '500px', borderRadius: '8px' }}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        {sample.map((denuncia) => (
-          <Marker 
+        {filtered.filter(d => d.latitud && d.longitud).map((denuncia) => (
+          <Marker
             key={denuncia.id}
-            position={[denuncia.lat, denuncia.lng]}
+            position={[denuncia.latitud, denuncia.longitud]}
             icon={createMarkerIcon(denuncia.estado)}
           >
             <Popup>
               <div style={{ fontSize: '12px', minWidth: '200px' }}>
-                <strong>{denuncia.problema}</strong><br/>
-                <small><strong>ID:</strong> {denuncia.id}</small><br/>
-                <small><strong>Ubicación:</strong> {denuncia.ubicacion}</small><br/>
-                <small><strong>Distrito:</strong> {denuncia.distrito}</small><br/>
+                <strong>{denuncia.titulo}</strong><br />
+                <small><strong>ID:</strong> #{denuncia.id}</small><br />
+                <small><strong>Ubicación:</strong> {denuncia.ubicacion}</small><br />
+                <small><strong>Distrito:</strong> {denuncia.distrito || 'N/A'}</small><br />
                 <small><strong>Estado:</strong> <span style={{
                   padding: '2px 6px',
                   borderRadius: '3px',
-                  backgroundColor: denuncia.estado === 'Resuelta' ? '#dcfce7' : 
-                                    denuncia.estado === 'Pendiente' ? '#fee2e2' : '#fef3c7',
+                  backgroundColor: denuncia.estado === 'Resuelta' ? '#dcfce7' :
+                    denuncia.estado === 'Pendiente' ? '#fee2e2' : '#fef3c7',
                   color: denuncia.estado === 'Resuelta' ? '#166534' :
-                         denuncia.estado === 'Pendiente' ? '#991b1b' : '#92400e'
-                }}>{denuncia.estado}</span></small><br/>
+                    denuncia.estado === 'Pendiente' ? '#991b1b' : '#92400e'
+                }}>{denuncia.estado}</span></small><br />
                 <small><strong>Fecha:</strong> {denuncia.fecha}</small>
               </div>
             </Popup>
@@ -148,10 +158,10 @@ const Denuncias = () => {
         <div className="card">
           <h3>Listado de Denuncias</h3>
           <div className="filters-row">
-            <input 
-              placeholder="Buscar por problema, ubicación o id" 
-              value={query} 
-              onChange={e => setQuery(e.target.value)} 
+            <input
+              placeholder="Buscar por problema, ubicación o id"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
             />
             <select value={estado} onChange={e => setEstado(e.target.value)}>
               {estados.map(e => <option key={e} value={e}>{e}</option>)}
@@ -175,24 +185,23 @@ const Denuncias = () => {
             <tbody>
               {filtered.map(r => (
                 <tr key={r.id}>
-                  <td className="mono">{r.id}</td>
-                  <td>{r.problema}</td>
+                  <td className="mono">#{r.id}</td>
+                  <td>{r.titulo}</td>
                   <td>{r.ubicacion}</td>
-                  <td>{r.distrito}</td>
+                  <td>{r.distrito || 'N/A'}</td>
                   <td>
-                    <span 
-                      className={`badge ${
-                        r.estado === 'Resuelta' 
-                          ? 'badge--resuelta' 
-                          : r.estado === 'Pendiente' 
-                          ? 'badge--pendiente' 
+                    <span
+                      className={`badge ${r.estado === 'Resuelta'
+                        ? 'badge--resuelta'
+                        : r.estado === 'Pendiente'
+                          ? 'badge--pendiente'
                           : 'badge--enprogreso'
-                      }`}
+                        }`}
                     >
                       {r.estado}
                     </span>
                   </td>
-                  <td>{r.fecha}</td>
+                  <td>{new Date(r.fecha_reporte).toLocaleDateString('es-PE')}</td>
                 </tr>
               ))}
             </tbody>
@@ -204,7 +213,7 @@ const Denuncias = () => {
           <p className="muted" style={{ marginBottom: '16px' }}>
             Visualización geográfica de todas las denuncias reportadas en Cusco. Los pines están coloreados según el estado.
           </p>
-          
+
           {/* Mapa interactivo con React Leaflet */}
           <MapComponent />
 
