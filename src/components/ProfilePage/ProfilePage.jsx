@@ -40,7 +40,7 @@ const ProfilePage = () => {
     };
     reader.readAsDataURL(file);
 
-    // NOTA: aquí podrías además subir a tu servidor / CDN si lo deseas
+    
   };
 
   return (

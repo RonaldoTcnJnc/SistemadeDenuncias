@@ -153,8 +153,9 @@ CREATE TABLE IF NOT EXISTS actualizaciones_autoridad (
     descripcion TEXT,
     fotografia_evidencia BYTEA,
     visible_para_ciudadano BOOLEAN DEFAULT FALSE,
-    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     visible_publicamente BOOLEAN DEFAULT TRUE
+);
 
 -- Tabla de equipo de trabajo municipal
 CREATE TABLE IF NOT EXISTS equipos_municipales (

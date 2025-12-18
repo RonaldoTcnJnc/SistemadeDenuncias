@@ -1,16 +1,165 @@
-# React + Vite
+# 🚨 Sistema de Denuncias
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema web para la gestión de denuncias ciudadanas con geolocalización y asignación a autoridades.
 
-Currently, two official plugins are available:
+## 🏗️ Arquitectura
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Frontend:** React + Vite + React Router
+- **Backend:** Express.js + PostgreSQL
+- **Mapas:** Google Maps API / Leaflet
 
-## React Compiler
+## 📁 Estructura del Proyecto
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```
+SistemaDeDenuncias/SD/
+├── backend/              # API REST con Express
+├── src/                 # Código fuente React
+├── database/            # Scripts SQL
+├── docs/                # Documentación
+└── public/              # Archivos estáticos
+```
 
-## Expanding the ESLint configuration
+## 🚀 Inicio Rápido
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Requisitos Previos
+- Node.js v18+
+- PostgreSQL v12+
+
+### Configuración
+
+**Ver la [Guía de Configuración Completa](./SETUP.md)** para instrucciones detalladas.
+
+Pasos rápidos:
+
+```bash
+# 1. Configurar variables de entorno
+copy .env.example .env
+copy backend\.env.example backend\.env
+
+# 2. Instalar dependencias del backend
+cd backend
+npm install
+
+# 3. Instalar dependencias del frontend
+cd ..
+npm install
+
+# 4. Iniciar backend (terminal 1)
+cd backend
+npm run dev
+
+# 5. Iniciar frontend (terminal 2)
+npm run dev
+```
+
+## 🛠️ Comandos Disponibles
+
+### Frontend
+```bash
+npm run dev      # Servidor de desarrollo (http://localhost:5173)
+npm run build    # Compilar para producción
+npm run preview  # Vista previa del build
+npm run lint     # Verificar código
+```
+
+### Backend
+```bash
+cd backend
+npm run dev      # Servidor con auto-reload (http://localhost:4000)
+npm start        # Servidor en producción
+```
+
+## 📚 Documentación
+
+- [SETUP.md](./SETUP.md) - Guía completa de configuración
+- [CHANGELOG.md](./CHANGELOG.md) - Historial de cambios
+- [docs/](./docs/) - Documentación adicional
+
+## 🔧 Tecnologías
+
+- **Frontend:** React 19, React Router, Vite
+- **Backend:** Express, PostgreSQL (pg)
+- **Mapas:** Google Maps API, Leaflet
+- **Estilos:** CSS Vanilla
+- **Iconos:** React Icons
+
+## 📝 Características
+
+- ✅ Registro y visualización de denuncias
+- ✅ Geolocalización con mapas interactivos
+- ✅ Asignación de denuncias a autoridades
+- ✅ Gestión de ciudadanos y autoridades
+- ✅ Filtrado por categorías y distritos
+
+## 🤝 Contribuir
+
+1. Crea una rama para tu feature
+2. Realiza tus cambios
+3. Asegúrate de que el código pase el linter
+4. Crea un Pull Request
+
+## 🚀 Despliegue
+
+### Opción 1: Despliegue en Vercel + Railway (Producción) ⭐ RECOMENDADO
+
+✅ **Archivos listos:**
+- `vercel.json` - Configuración de Vercel
+- `Procfile` - Configuración de Railway
+- `.env.vercel.example` - Variables para frontend
+- `backend/.env.production.example` - Variables para backend
+
+**Pasos rápidos:**
+1. Sube tu código a GitHub
+2. Despliega backend en [Railway.app](https://railway.app) (incluye PostgreSQL gratis)
+3. Despliega frontend en [Vercel.com](https://vercel.com)
+4. Configura variables de entorno en ambos
+
+📖 **[Ver Guía Completa de Despliegue en Vercel](./docs/vercel_deployment.md)**
+
+---
+
+### Opción 2: Despliegue Local (Desarrollo)
+
+✅ **Configuración completada:**
+- Backend `.env` configurado
+- Dependencias instaladas
+- Script `init.sql` listo para inicializar la base de datos
+
+**Pasos para Desplegar:**
+
+1. **Inicializar Base de Datos**
+   ```bash
+   # Opción A: Script automatizado
+   cd database
+   .\setup.ps1
+   
+   # Opción B: Manual
+   psql -U postgres -c "CREATE DATABASE sistema_denuncias;"
+   psql -U postgres -d sistema_denuncias -f database/init.sql
+   ```
+
+2. **Iniciar Backend** (Terminal 1)
+   ```bash
+   cd backend
+   npm run dev
+   ```
+
+3. **Verificar Frontend** (ya corriendo en Terminal 2)
+   ```
+   http://localhost:5173
+   ```
+
+4. **Verificar Conexión**
+   ```bash
+   curl http://localhost:4000/api/health
+   ```
+
+📖 **[Ver Guía de Despliegue Local](./docs/deployment_guide.md)**
+
+## 📄 Licencia
+
+Este proyecto es privado y de uso interno.
+
+---
+
+**Desarrollado con ❤️ para mejorar la gestión de denuncias ciudadanas**
