@@ -215,6 +215,26 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// GET /api/ciudadanos/:id - Obtener perfil de ciudadano específico
+app.get('/api/ciudadanos/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(
+      'SELECT id, nombre_completo, email, telefono, direccion, ciudad, distrito, fecha_registro, verificado FROM ciudadanos WHERE id = $1',
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Ciudadano no encontrado' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error fetching citizen profile:', err);
+    res.status(500).json({ error: 'Error al obtener perfil', details: err.message });
+  }
+});
+
 // PUT /api/ciudadanos/:id - Actualizar perfil de ciudadano
 app.put('/api/ciudadanos/:id', async (req, res) => {
   try {

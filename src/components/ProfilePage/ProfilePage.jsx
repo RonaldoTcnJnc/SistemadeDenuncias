@@ -22,22 +22,52 @@ const ProfilePage = () => {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      const userData = JSON.parse(userStr);
-      setUser(userData);
-      setFormData({
-        nombre_completo: userData.nombre_completo || '',
-        email: userData.email || '',
-        telefono: userData.telefono || '',
-        direccion: userData.direccion || '',
-        ciudad: userData.ciudad || '',
-        distrito: userData.distrito || ''
-      });
+    const fetchUserData = async () => {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const localUser = JSON.parse(userStr);
+        try {
+          // Intentar obtener datos frescos del backend
+          const response = await fetch(`/api/ciudadanos/${localUser.id}`);
+          if (response.ok) {
+            const userData = await response.json();
+
+            // Combinar datos locales (como token si lo hubiera) con datos frescos
+            const updatedUser = { ...localUser, ...userData };
+
+            setUser(updatedUser);
+            // Actualizar localStorage para mantener sesión sincronizada
+            localStorage.setItem('user', JSON.stringify(updatedUser)); // update local storage on app load to keep consistent state.
+
+            setFormData({
+              nombre_completo: userData.nombre_completo || '',
+              email: userData.email || '',
+              telefono: userData.telefono || '',
+              direccion: userData.direccion || '',
+              ciudad: userData.ciudad || '',
+              distrito: userData.distrito || ''
+            });
+          } else {
+            // Fallback si falla el fetch (ej. sin conexión)
+            throw new Error("Failed to fetch");
+          }
+        } catch (error) {
+          console.error("Error fetching fresh user data, using local storage:", error);
+          setUser(localUser);
+          setFormData({
+            nombre_completo: localUser.nombre_completo || '',
+            email: localUser.email || '',
+            telefono: localUser.telefono || '',
+            direccion: localUser.direccion || '',
+            ciudad: localUser.ciudad || '',
+            distrito: localUser.distrito || ''
+          });
+        }
+      }
       setLoading(false);
-    } else {
-      setLoading(false);
-    }
+    };
+
+    fetchUserData();
   }, []);
 
   const handleEditPicClick = () => {
