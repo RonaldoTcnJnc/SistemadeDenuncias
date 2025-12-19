@@ -1,10 +1,15 @@
 .auth-layout {
   display: flex;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .auth-main {
   flex-grow: 1;
   background-color: var(--background-color);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Reuse dashboard header and page content styles to match user dashboard */
@@ -53,7 +58,7 @@
   border-radius: 10px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   width: 420px;
-  max-height: 600px;
+  max-height: 500px;
   overflow-y: auto;
   z-index: 1200;
   padding: 16px;
@@ -338,6 +343,8 @@
 
 .dashboard-page-content {
   padding: 40px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .header-left .brand {
