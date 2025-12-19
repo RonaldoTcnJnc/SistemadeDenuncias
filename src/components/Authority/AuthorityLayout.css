@@ -59,9 +59,10 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   width: 420px;
   max-height: 500px;
-  overflow-y: auto;
   z-index: 1200;
   padding: 16px;
+  display: flex;
+  flex-direction: column;
 }
 
 .notifications-modal h3 {
@@ -69,12 +70,15 @@
   font-size: 16px;
   font-weight: 700;
   color: var(--text-color);
+  flex-shrink: 0;
 }
 
 .complaints-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  overflow-y: auto;
+  max-height: 420px;
 }
 
 .complaint-card {
