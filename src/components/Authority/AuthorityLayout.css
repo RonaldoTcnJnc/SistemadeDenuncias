@@ -16,6 +16,8 @@
   display: flex;
   align-items: center;
   position: relative;
+  overflow: visible !important;
+  flex-shrink: 0;
 }
 
 .notification-icon {
