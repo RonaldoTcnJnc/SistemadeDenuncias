@@ -1,9 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './LoginPage.css';
-// Importa íconos
-import { FcGoogle } from 'react-icons/fc';
-import { FaFacebook } from 'react-icons/fa';
 
 const LoginPage = () => {
   const [email, setEmail] = React.useState('');
@@ -22,6 +19,18 @@ const LoginPage = () => {
         body: JSON.stringify({ email, password, type: 'ciudadano' })
       });
 
+      // Verificar si la respuesta es OK antes de parsear JSON
+      if (!response.ok) {
+        // Intentar obtener el mensaje de error del servidor
+        try {
+          const errorData = await response.json();
+          setError(errorData.error || 'Error al iniciar sesión');
+        } catch {
+          setError('Error de conexión con el servidor. Verifica que el backend esté corriendo en http://localhost:4000');
+        }
+        return;
+      }
+
       const data = await response.json();
 
       if (data.success) {
@@ -34,8 +43,8 @@ const LoginPage = () => {
         setError(data.error || 'Error al iniciar sesión');
       }
     } catch (err) {
-      console.error(err);
-      setError('Error de conexión con el servidor');
+      console.error('Error de conexión:', err);
+      setError('Error de conexión con el servidor. Verifica que el backend esté corriendo en http://localhost:4000');
     }
   };
 
@@ -77,15 +86,6 @@ const LoginPage = () => {
           </div>
           <button type="submit" className="btn-login-submit">Iniciar Sesión</button>
         </form>
-        <div className="separator">O continuar con</div>
-        <div className="social-login-buttons">
-          <button type="button" className="btn-social google">
-            <FcGoogle size={22} /> Google
-          </button>
-          <button type="button" className="btn-social facebook">
-            <FaFacebook size={22} color="#1877F2" /> Facebook
-          </button>
-        </div>
         <p className="signup-link">
           ¿No tienes una cuenta? <Link to="/registro">Crear cuenta</Link>
         </p>
