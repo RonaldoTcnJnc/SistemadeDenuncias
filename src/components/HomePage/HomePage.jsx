@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './HomePage.css';
 import DenunciaLogo from '../../assets/DenunciaYa.png';
 // Importa íconos (necesitarás instalar react-icons: npm install react-icons)
@@ -9,16 +9,12 @@ import {
   FiSearch,
   FiTwitter,
   FiFacebook,
-  FiHome,
   FiHelpCircle
 } from 'react-icons/fi';
 
 // Componente Header: navegación principal.
-// - isActive: compara ruta actual para marcar el link activo.
 // - Reemplaza los enlaces y rutas según tu sistema de rutas.
 const Header = () => {
-  const location = useLocation();
-  const isActive = (path) => location.pathname === path;
 
   return (
     <header className="home-header">
@@ -33,10 +29,6 @@ const Header = () => {
         <div className="header-right">
           {/* Navegación principal: añade/elimina enlaces según necesidades */}
           <nav className="nav-right">
-            <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
-              <FiHome size={18} />
-              <span className="link-text">Inicio</span>
-            </Link>
             {/* Ayuda: enlace a la página de ayuda */}
             <Link to="/ayuda" className="nav-link nav-help">
               <FiHelpCircle size={18} />

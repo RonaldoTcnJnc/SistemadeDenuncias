@@ -69,34 +69,6 @@
 .btn-login-submit:hover {
   background-color: #3a58dd;
 }
-.separator {
-  margin: 30px 0;
-  color: var(--dark-gray-color);
-  font-size: 14px;
-}
-.social-login-buttons {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 30px;
-}
-.btn-social {
-  flex: 1;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid var(--medium-gray-color);
-  background: var(--white-color);
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  transition: background-color 0.3s;
-}
-.btn-social:hover {
-  background-color: var(--light-gray-color);
-}
 .signup-link {
   font-size: 15px;
 }

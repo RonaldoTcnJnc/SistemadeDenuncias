@@ -9,14 +9,16 @@
 
 CREATE TABLE IF NOT EXISTS ciudadanos (
     id SERIAL PRIMARY KEY,
+    dni VARCHAR(20) UNIQUE,
     nombre_completo VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     telefono VARCHAR(20),
     direccion TEXT,
     ciudad VARCHAR(100),
     distrito VARCHAR(100),
+    fecha_nacimiento DATE,
     fotografia_perfil BYTEA,
-    contraseña_hash VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ultimo_login TIMESTAMP,
     activo BOOLEAN DEFAULT TRUE,
