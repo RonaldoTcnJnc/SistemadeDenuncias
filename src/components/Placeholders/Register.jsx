@@ -29,7 +29,6 @@ const Register = () => {
   const debounceTimer = useRef(null);
 
   // Función para consultar la API de DNI
-  // Usa Graph Peru (gratuita, sin token) como principal
   const consultarDNI = async (dni) => {
     if (!dni || dni.length !== 8) {
       return;
@@ -38,10 +37,9 @@ const Register = () => {
     setLoadingDNI(true);
     setDniError('');
 
-    // API: Graph Peru (gratuita, sin token)
     try {
       console.log('🔍 Consultando DNI:', dni);
-      const response = await fetch(`https://graphperu.daustinn.com/api/query/${dni}`, {
+      const response = await fetch(`/api/auth/consultar-dni?dni=${dni}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -51,88 +49,81 @@ const Register = () => {
       console.log('📡 Respuesta HTTP:', {
         status: response.status,
         statusText: response.statusText,
-        ok: response.ok,
-        headers: Object.fromEntries(response.headers.entries())
+        ok: response.ok
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
+        let errorText = await response.text();
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorText = errorJson.message || errorJson.error || errorText;
+        } catch (e) {
+          // Keep as text
+        }
         console.error('❌ Error de respuesta:', errorText);
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        throw new Error(`Error ${response.status}: ${errorText || response.statusText}`);
       }
 
       const data = await response.json();
       console.log('📦 Datos completos recibidos:', JSON.stringify(data, null, 2));
       console.log('🔑 Claves disponibles:', Object.keys(data || {}));
 
-      // Intentar extraer nombre completo de diferentes estructuras posibles
+      // EXTRACCIÓN DEL NOMBRE COMPLETO - ORDEN DE PRIORIDAD
       let nombreCompleto = '';
       let direccion = '';
       let fechaNacimiento = '';
 
-      // Estructura 1: Graph Peru típica { nombres, apellidoPaterno, apellidoMaterno }
-      if (data.nombres) {
-        // Asegurarse de incluir nombres (no solo apellidos)
-        const nombres = data.nombres || '';
-        const apellidoPaterno = data.apellidoPaterno || data.apellido_paterno || '';
-        const apellidoMaterno = data.apellidoMaterno || data.apellido_materno || '';
-        
-        // Construir nombre completo: nombres + apellidos
-        nombreCompleto = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`.trim();
-        
-        direccion = data.direccion || data.domicilio || data.direccionCompleta || '';
-        fechaNacimiento = data.fechaNacimiento || data.fecha_nacimiento || '';
-        
-        console.log('📋 Componentes del nombre:', { nombres, apellidoPaterno, apellidoMaterno });
+      // PRIORIDAD 1: fullName directo (tu API lo devuelve así)
+      if (data.fullName) {
+        nombreCompleto = data.fullName.trim();
+        console.log('✅ Nombre encontrado en fullName:', nombreCompleto);
       }
-      // Estructura 2: { nombre_completo } - ya viene completo
+      // PRIORIDAD 2: Construir desde names y surnames (tu API también lo tiene)
+      else if (data.names && data.surnames) {
+        nombreCompleto = `${data.names} ${data.surnames}`.trim();
+        console.log('✅ Nombre construido desde names + surnames:', nombreCompleto);
+      }
+      // PRIORIDAD 3: nombre_completo o nombreCompleto
       else if (data.nombre_completo || data.nombreCompleto) {
-        nombreCompleto = data.nombre_completo || data.nombreCompleto;
-        direccion = data.direccion || data.domicilio || '';
-        fechaNacimiento = data.fecha_nacimiento || data.fechaNacimiento || '';
+        nombreCompleto = (data.nombre_completo || data.nombreCompleto).trim();
+        console.log('✅ Nombre encontrado en nombre_completo/nombreCompleto:', nombreCompleto);
       }
-      // Estructura 3: { nombre } - nombre simple
-      else if (data.nombre) {
-        nombreCompleto = data.nombre;
-        direccion = data.direccion || data.domicilio || '';
-        fechaNacimiento = data.fecha_nacimiento || data.fechaNacimiento || '';
+      // PRIORIDAD 4: Estructura con nombres, apellidoPaterno, apellidoMaterno
+      else if (data.nombres) {
+        const nombres = data.nombres || '';
+        const apellidoPaterno = data.apellidoPaterno || data.apellido_paterno || data.paternalLastName || '';
+        const apellidoMaterno = data.apellidoMaterno || data.apellido_materno || data.maternalLastName || '';
+        nombreCompleto = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`.trim();
+        console.log('✅ Nombre construido desde nombres + apellidos:', nombreCompleto);
       }
-      // Estructura 4: { data: { nombres, ... } } - datos anidados
+      // PRIORIDAD 5: Datos anidados en data
       else if (data.data) {
         const d = data.data;
-        if (d.nombres) {
+        if (d.fullName) {
+          nombreCompleto = d.fullName.trim();
+        } else if (d.names && d.surnames) {
+          nombreCompleto = `${d.names} ${d.surnames}`.trim();
+        } else if (d.nombres) {
           const nombres = d.nombres || '';
           const apellidoPaterno = d.apellidoPaterno || d.apellido_paterno || '';
           const apellidoMaterno = d.apellidoMaterno || d.apellido_materno || '';
           nombreCompleto = `${nombres} ${apellidoPaterno} ${apellidoMaterno}`.trim();
-        } else if (d.nombre_completo || d.nombreCompleto) {
-          nombreCompleto = d.nombre_completo || d.nombreCompleto;
         }
-        direccion = d.direccion || d.domicilio || '';
-        fechaNacimiento = d.fecha_nacimiento || d.fechaNacimiento || '';
+        console.log('✅ Nombre extraído de data anidado:', nombreCompleto);
       }
-      // Estructura 5: Buscar cualquier campo que contenga "nombre" o "name"
-      else {
-        const nombreKeys = Object.keys(data).filter(k => 
-          k.toLowerCase().includes('nombre') || 
-          k.toLowerCase().includes('name')
-        );
-        if (nombreKeys.length > 0) {
-          nombreCompleto = data[nombreKeys[0]];
-          console.log('✅ Nombre encontrado en clave:', nombreKeys[0]);
-        }
-      }
-      
-      // Validación adicional: si solo tenemos apellidos, buscar el campo "nombres" específicamente
-      if (nombreCompleto && !nombreCompleto.includes(' ') && data.nombres) {
-        // Si el nombre completo parece ser solo un apellido, intentar reconstruirlo
-        const nombres = data.nombres || '';
-        const apellidos = nombreCompleto;
-        nombreCompleto = `${nombres} ${apellidos}`.trim();
-        console.log('🔧 Nombre reconstruido desde nombres + apellidos');
+      // PRIORIDAD 6: nombre simple
+      else if (data.nombre) {
+        nombreCompleto = data.nombre.trim();
+        console.log('✅ Nombre encontrado en campo nombre:', nombreCompleto);
       }
 
-      // Convertir fecha de nacimiento al formato correcto
+      // Extraer dirección
+      direccion = data.direccion || data.domicilio || data.direccionCompleta || data.address || '';
+      
+      // Extraer fecha de nacimiento
+      fechaNacimiento = data.fechaNacimiento || data.fecha_nacimiento || data.birthDate || '';
+
+      // Convertir fecha de nacimiento al formato correcto (YYYY-MM-DD)
       if (fechaNacimiento) {
         const fecha = String(fechaNacimiento);
         if (fecha.includes('/')) {
@@ -147,12 +138,13 @@ const Register = () => {
         }
       }
 
-      console.log('📝 Datos extraídos:', {
+      console.log('📝 Datos finales extraídos:', {
         nombreCompleto,
         direccion,
         fechaNacimiento
       });
 
+      // Validar que se obtuvo el nombre
       if (nombreCompleto && nombreCompleto.trim()) {
         setFormData(prev => ({
           ...prev,
@@ -162,11 +154,19 @@ const Register = () => {
         }));
         setDniError('');
         console.log('✅ Datos autocompletados exitosamente');
-        setLoadingDNI(false);
-        return;
+        
+        // Mostrar mensaje de éxito temporal
+        setTimeout(() => {
+          console.log('✅ Formulario actualizado con:', {
+            fullName: nombreCompleto.trim(),
+            address: direccion,
+            fechaNacimiento: fechaNacimiento
+          });
+        }, 100);
       } else {
         console.warn('⚠️ No se pudo extraer el nombre completo de la respuesta');
-        throw new Error('La API no devolvió información válida del nombre');
+        console.warn('⚠️ Estructura de datos recibida:', data);
+        throw new Error('No se pudo obtener el nombre desde la API. Por favor, completa manualmente.');
       }
 
     } catch (error) {
@@ -175,7 +175,15 @@ const Register = () => {
         stack: error.stack,
         dni: dni
       });
-      setDniError(`No se pudo obtener la información del DNI. Error: ${error.message}. Por favor, completa los datos manualmente.`);
+      setDniError(`No se pudo obtener la información del DNI. ${error.message}`);
+      
+      // Permitir que el usuario continúe manualmente
+      setFormData(prev => ({
+        ...prev,
+        fullName: '',
+        address: prev.address,
+        fechaNacimiento: prev.fechaNacimiento
+      }));
     } finally {
       setLoadingDNI(false);
     }
@@ -291,7 +299,7 @@ const Register = () => {
         };
 
         // Intentar registrar en el backend
-        const response = await fetch('/api/ciudadanos/register', {
+        const response = await fetch('/api/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -363,9 +371,9 @@ const Register = () => {
             </div>
             {errors.dni && <span className="error-message">{errors.dni}</span>}
             {dniError && <span className="error-message" style={{ color: '#ff9800' }}>{dniError}</span>}
-            {formData.dni.length === 8 && !loadingDNI && !dniError && (
+            {formData.dni.length === 8 && !loadingDNI && !dniError && formData.fullName && (
               <span style={{ fontSize: '12px', color: '#4caf50', marginTop: '4px' }}>
-                ✓ DNI válido
+                ✓ DNI válido - Datos obtenidos correctamente
               </span>
             )}
           </div>
@@ -380,9 +388,18 @@ const Register = () => {
                 placeholder="Juan Pérez García"
                 value={formData.fullName}
                 onChange={handleChange}
-                readOnly={loadingDNI}
+                disabled={loadingDNI}
+                style={{
+                  backgroundColor: loadingDNI ? '#f5f5f5' : 'white',
+                  cursor: loadingDNI ? 'wait' : 'text'
+                }}
               />
               {errors.fullName && <span className="error-message">{errors.fullName}</span>}
+              {formData.fullName && !errors.fullName && (
+                <span style={{ fontSize: '12px', color: '#4caf50', marginTop: '4px' }}>
+                  ✓ Nombre autocompletado desde RENIEC
+                </span>
+              )}
             </div>
           </div>
 
@@ -406,7 +423,7 @@ const Register = () => {
                 type="tel"
                 id="phone"
                 name="phone"
-                placeholder="+34 612 345 678"
+                placeholder="+51 999 999 999"
                 value={formData.phone}
                 onChange={handleChange}
               />
@@ -420,10 +437,14 @@ const Register = () => {
               type="text"
               id="address"
               name="address"
-              placeholder="Calle Principal, 123, Apto 4B"
+              placeholder="Av. Principal 123, Distrito"
               value={formData.address}
               onChange={handleChange}
-              readOnly={loadingDNI}
+              disabled={loadingDNI}
+              style={{
+                backgroundColor: loadingDNI ? '#f5f5f5' : 'white',
+                cursor: loadingDNI ? 'wait' : 'text'
+              }}
             />
             {errors.address && <span className="error-message">{errors.address}</span>}
           </div>
@@ -436,11 +457,15 @@ const Register = () => {
               name="fechaNacimiento"
               value={formData.fechaNacimiento}
               onChange={handleChange}
-              readOnly={loadingDNI}
+              disabled={loadingDNI}
+              style={{
+                backgroundColor: loadingDNI ? '#f5f5f5' : 'white',
+                cursor: loadingDNI ? 'wait' : 'text'
+              }}
             />
             {formData.fechaNacimiento && (
               <span style={{ fontSize: '12px', color: '#4caf50', marginTop: '4px' }}>
-                ✓ Fecha de nacimiento obtenida
+                ✓ Fecha de nacimiento registrada
               </span>
             )}
           </div>
