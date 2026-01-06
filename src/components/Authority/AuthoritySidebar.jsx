@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import './AuthoritySidebar.css';
-import { FiHome, FiFileText, FiBarChart2, FiUsers, FiUser, FiSettings } from 'react-icons/fi';
+import { FiHome, FiFileText, FiBarChart2, FiUser, FiSettings } from 'react-icons/fi';
 
 const AuthoritySidebar = () => {
   const navigate = useNavigate();
@@ -31,7 +31,6 @@ const AuthoritySidebar = () => {
         <NavLink to="/panel-autoridad" className={({isActive}) => 'sidebar-link' + (isActive ? ' active' : '')}><span className="sidebar-icon"><FiHome/></span> Inicio</NavLink>
         <NavLink to="/denuncias" className={({isActive}) => 'sidebar-link' + (isActive ? ' active' : '')}><span className="sidebar-icon"><FiFileText/></span> Denuncias</NavLink>
         <NavLink to="/estadisticas" className={({isActive}) => 'sidebar-link' + (isActive ? ' active' : '')}><span className="sidebar-icon"><FiBarChart2/></span> Estadísticas</NavLink>
-        <NavLink to="/usuarios" className={({isActive}) => 'sidebar-link' + (isActive ? ' active' : '')}><span className="sidebar-icon"><FiUsers/></span> Usuarios</NavLink>
         <NavLink to="/perfil-autoridad" className={({isActive}) => 'sidebar-link' + (isActive ? ' active' : '')}><span className="sidebar-icon"><FiUser/></span> Perfil</NavLink>
         <NavLink to="/configuracion-autoridad" className={({isActive}) => 'sidebar-link' + (isActive ? ' active' : '')}><span className="sidebar-icon"><FiSettings/></span> Configuración</NavLink>
       </nav>

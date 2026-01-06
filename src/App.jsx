@@ -7,7 +7,6 @@ import AuthorityLogin from './components/Authority/AuthorityLogin';
 import AuthorityDashboard from './components/Authority/AuthorityDashboard';
 import Denuncias from './components/Authority/Denuncias';
 import Estadisticas from './components/Authority/Estadisticas';
-import Usuarios from './components/Authority/Usuarios';
 import PerfilAuthority from './components/Authority/PerfilAuthority';
 import ConfiguracionAuthority from './components/Authority/ConfiguracionAuthority';
 import AuthorityKnowledge from './components/Authority/AuthorityKnowledge';
@@ -64,15 +63,6 @@ function App() {
           isAuthenticated ? (
             <AuthorityLayout>
               <Estadisticas />
-            </AuthorityLayout>
-          ) : (
-            <Navigate to="/iniciar-sesion-autoridad" />
-          )
-        } />
-        <Route path="/usuarios" element={
-          isAuthenticated ? (
-            <AuthorityLayout>
-              <Usuarios />
             </AuthorityLayout>
           ) : (
             <Navigate to="/iniciar-sesion-autoridad" />
